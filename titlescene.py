@@ -3,10 +3,20 @@ import libtcodpy as rl
 import boxes as bx
 
 class TitleScene: # As the name suggests, the title screen.
+    def __init__(self):
+        self.box = bx.SelectBox(33,17,14,6,None,("New Game","Continue","Modding","Exit")) # The main menu box.
+
     def refresh(self):
         rl.console_print(0, 7, 2, "#  #  ##  #### ###  #  # ###  ##  #  #     #  # #### #  # #  #  ###\n## # #  # #     #   ## #  #  #  # ## #     ## # #    #  # #  # #\n# ## #### ###   #   # ##  #  #### # ##     # ## ###   ##  #  #  ##\n#  # #  # #     #   #  #  #  #  # #  #     #  # #    #  # #  #    #\n#  # #  # #    ###  #  # ### #  # #  #     #  # #### #  #  ##  ###") # Draw the title.
-        testBox = bx.Box(33,17,14,6,None,'{0} New Game\n  Continue\n  Modding\n  Exit'.format(chr(rl.CHAR_ARROW2_E)).encode()) # A test box. Will, of course, be replaced later with something more interactive.
-        testBox.draw() # Draws the test box on the screen.
+        self.box.draw() # Draws the menu box on the screen.
     
     def handleInput(self):
-        rl.console_wait_for_keypress(True) # Halt until a key is pressed. Do nothing withthe key press in this case.
+        key = rl.console_wait_for_keypress(True) # Halt until a key is pressed. Do nothing withthe key press in this case.
+        if key.pressed == True: # Only process key press, not key release.
+            if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
+                command = self.box.forward() # Retrieve the selected option.
+                print(command) # Just print it for now.
+            elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
+                self.box.goDown() # Go down one item.
+            elif key.vk == rl.KEY_UP or key.vk == rl.KEY_KP8:
+                self.box.goUp() # Go up one item.
