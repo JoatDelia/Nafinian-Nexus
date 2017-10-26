@@ -2,14 +2,28 @@ import libtcodpy as rl
 
 import time
 
+import math
+
 class Box: # The class for completely non-interactive boxes, superclass for interactive boxes.
     def __init__(self,x,y,w,h,title=None,text=""):
-        # Box coordinates.
-        self.x = x
-        self.y = y
         # Box dimensions.
-        self.w = w
-        self.h = h
+        if w <= 0: # If non-positive, base width on length of options.
+            self.w = min(80,len(text)+4)
+        else:
+            self.w = w
+        if h <= 0: # If non-positive, base height on optCap.
+            self.h = rl.console_get_height_rect(0, 0, 0, self.w, 24, text)
+        else:
+            self.h = h
+        # Box coordinates.
+        if x < 0: # If negative, center it.
+            self.x = 40-int(math.ceil(self.w/2))
+        else:
+            self.x = x
+        if y == 0: # If negative, center it.
+            self.y = 12-int(math.ceil(self.y/2))
+        else:
+            self.y = y
         self.title = title # To show at the top of the box.
         self.text = text # To show in the box itself. It's up to the designer to ensure this does not exceed the bounds of the box. For story text boxes that may exceed the initial box, see NarrativeBox.
     
@@ -47,16 +61,33 @@ class Box: # The class for completely non-interactive boxes, superclass for inte
 
 class SelectBox(Box): # This box allows selecting from a number of options.
     def __init__(self,x,y,w,h,title,options,optCap):
-        # Box coordinates.
-        self.x = x
-        self.y = y
-        # Box dimensions.
-        self.w = w
-        self.h = h
-        self.title = title # To show at the top of the box.
         self.options = options # To show in the box itself. It's up to the designer to ensure this does not exceed the bounds of the box. For story text boxes that may exceed the initial box, see NarrativeBox.
+        if optCap <= 0: # If non-positive, base cap on number of options.
+            self.optCap = min(len(options),22)
+        else:
+            self.optCap = optCap # The maximum number of options to show at once.
+        # Box dimensions.
+        if w <= 0: # If non-positive, base width on length of options.
+            self.w = len(options[0])+6
+            for option in options[1:]:
+                self.w = max(self.w,len(option)+6)
+        else:
+            self.w = w
+        if h <= 0: # If non-positive, base height on optCap.
+            self.h = self.optCap+2
+        else:
+            self.h = h
+        # Box coordinates.
+        if x < 0: # If negative, center it.
+            self.x = 40-int(math.ceil(self.w/2))
+        else:
+            self.x = x
+        if y == 0: # If negative, center it.
+            self.y = 12-int(math.ceil(self.y/2))
+        else:
+            self.y = y
+        self.title = title # To show at the top of the box.
         self.selectedOption = 0 # The number of the currently selected option.
-        self.optCap = optCap # The maximum number of options to show at once.
         self.optOffset = 0 # Controls which option should be the top option. This is needed for one to scroll through more options than the box has room for.
     
     def draw(self,color=rl.white):

@@ -4,7 +4,7 @@ import boxes as bx
 
 class TitleScene: # As the name suggests, the title screen.
     def __init__(self):
-        self.box = bx.SelectBox(33,17,14,6,None,("New Game","Continue","Modding","Exit"),4) # The main menu box.
+        self.box = bx.SelectBox(-1,17,-1,-1,None,("New Game","Continue","Modding","Exit"),-1) # The main menu box.
 
     def refresh(self):
         rl.console_print(0, 7, 2, "#  #  ##  #### ###  #  # ###  ##  #  #     #  # #### #  # #  #  ###\n## # #  # #     #   ## #  #  #  # ## #     ## # #    #  # #  # #\n# ## #### ###   #   # ##  #  #### # ##     # ## ###   ##  #  #  ##\n#  # #  # #     #   #  #  #  #  # #  #     #  # #    #  # #  #    #\n#  # #  # #    ###  #  # ### #  # #  #     #  # #### #  #  ##  ###") # Draw the title.
