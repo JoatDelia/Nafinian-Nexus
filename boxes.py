@@ -20,8 +20,8 @@ class Box: # The class for completely non-interactive boxes, superclass for inte
             self.x = 40-int(math.ceil(self.w/2))
         else:
             self.x = x
-        if y == 0: # If negative, center it.
-            self.y = 12-int(math.ceil(self.y/2))
+        if y < 0: # If negative, center it.
+            self.y = 12-int(math.ceil(self.h/2))
         else:
             self.y = y
         self.title = title # To show at the top of the box.
@@ -82,8 +82,8 @@ class SelectBox(Box): # This box allows selecting from a number of options.
             self.x = 40-int(math.ceil(self.w/2))
         else:
             self.x = x
-        if y == 0: # If negative, center it.
-            self.y = 12-int(math.ceil(self.y/2))
+        if y < 0: # If negative, center it.
+            self.y = 12-int(math.ceil(self.h/2))
         else:
             self.y = y
         self.title = title # To show at the top of the box.

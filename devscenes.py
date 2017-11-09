@@ -2,12 +2,11 @@ import libtcodpy as rl
 
 import boxes as bx
 
-class TitleScene: # As the name suggests, the title screen.
+class DevMenuScene: # As the name suggests, the title screen.
     def __init__(self):
-        self.box = bx.SelectBox(-1,17,-1,-1,None,("New Game","Continue","Modding","Exit"),-1) # The main menu box.
+        self.box = bx.SelectBox(-1,-1,-1,-1,"Modding Menu",("Basic Details","Biomes","Classes","Dialogues","Enemies","Equipment","Feats","Items","Names","Races","Screens","Spells","Save","Load","Exit"),-1) # The main menu box.
 
     def refresh(self):
-        rl.console_print(0, 7, 2, "#  #  ##  #### ###  #  # ###  ##  #  #     #  # #### #  # #  #  ###\n## # #  # #     #   ## #  #  #  # ## #     ## # #    #  # #  # #\n# ## #### ###   #   # ##  #  #### # ##     # ## ###   ##  #  #  ##\n#  # #  # #     #   #  #  #  #  # #  #     #  # #    #  # #  #    #\n#  # #  # #    ###  #  # ### #  # #  #     #  # #### #  #  ##  ###") # Draw the title.
         self.box.draw() # Draws the menu box on the screen.
     
     def handleInput(self):
@@ -16,9 +15,7 @@ class TitleScene: # As the name suggests, the title screen.
             if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
                 command = self.box.forward() # Retrieve the selected option.
                 if command == "Exit":
-                    raise SystemExit # Exit
-                elif command == "Modding":
-                    return "DevMenuScene"
+                    return "TitleScene"
                 print(command) # Just print it for now.
                 return None
             elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
