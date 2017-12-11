@@ -30,18 +30,19 @@ class Box: # The class for completely non-interactive boxes, superclass for inte
     def draw(self,color=rl.white):
         oldColor = rl.console_get_default_foreground(0) # Store old color.
         rl.console_set_default_foreground(0, color) # Apply window's color.
+        rl.console_rect(0, self.x, self.y, self.w, self.h, True) # Reset background color for the box.
         # Draw the corners.
-        rl.console_set_char(0, self.x, self.y, rl.CHAR_DNW)
-        rl.console_set_char(0, self.x+self.w-1, self.y, rl.CHAR_DNE)
-        rl.console_set_char(0, self.x, self.y+self.h-1, rl.CHAR_DSW)
-        rl.console_set_char(0, self.x+self.w-1, self.y+self.h-1, rl.CHAR_DSE)
+        rl.console_put_char_ex(0, self.x, self.y, rl.CHAR_DNW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+        rl.console_put_char_ex(0, self.x+self.w-1, self.y, rl.CHAR_DNE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+        rl.console_put_char_ex(0, self.x, self.y+self.h-1, rl.CHAR_DSW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+        rl.console_put_char_ex(0, self.x+self.w-1, self.y+self.h-1, rl.CHAR_DSE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         # Draw the walls.
         for i in range(self.y+1,self.y+self.h-1):
-            rl.console_set_char(0, self.x, i, rl.CHAR_DVLINE)
-            rl.console_set_char(0, self.x+self.w-1, i, rl.CHAR_DVLINE)
+            rl.console_put_char_ex(0, self.x, i, rl.CHAR_DVLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+            rl.console_put_char_ex(0, self.x+self.w-1, i, rl.CHAR_DVLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         for i in range(self.x+1,self.x+self.w-1):
-            rl.console_set_char(0, i, self.y, rl.CHAR_DHLINE)
-            rl.console_set_char(0, i, self.y+self.h-1, rl.CHAR_DHLINE)
+            rl.console_put_char_ex(0, i, self.y, rl.CHAR_DHLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+            rl.console_put_char_ex(0, i, self.y+self.h-1, rl.CHAR_DHLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         if self.title != None: # Draw the title, if present.
             rl.console_print(0,self.x+2,self.y," {0} ".format(self.title))
         rl.console_set_default_foreground(0, oldColor) # Revert color before drawing rest of window.
@@ -93,18 +94,19 @@ class SelectBox(Box): # This box allows selecting from a number of options.
     def draw(self,color=rl.white):
         oldColor = rl.console_get_default_foreground(0) # Store old color.
         rl.console_set_default_foreground(0, color) # Apply window's color.
+        rl.console_rect(0, self.x, self.y, self.w, self.h, True) # Reset background color for the box.
         # Draw the corners.
-        rl.console_set_char(0, self.x, self.y, rl.CHAR_DNW)
-        rl.console_set_char(0, self.x+self.w-1, self.y, rl.CHAR_DNE)
-        rl.console_set_char(0, self.x, self.y+self.h-1, rl.CHAR_DSW)
-        rl.console_set_char(0, self.x+self.w-1, self.y+self.h-1, rl.CHAR_DSE)
+        rl.console_put_char_ex(0, self.x, self.y, rl.CHAR_DNW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+        rl.console_put_char_ex(0, self.x+self.w-1, self.y, rl.CHAR_DNE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+        rl.console_put_char_ex(0, self.x, self.y+self.h-1, rl.CHAR_DSW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+        rl.console_put_char_ex(0, self.x+self.w-1, self.y+self.h-1, rl.CHAR_DSE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         # Draw the walls.
         for i in range(self.y+1,self.y+self.h-1):
-            rl.console_set_char(0, self.x, i, rl.CHAR_DVLINE)
-            rl.console_set_char(0, self.x+self.w-1, i, rl.CHAR_DVLINE)
+            rl.console_put_char_ex(0, self.x, i, rl.CHAR_DVLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+            rl.console_put_char_ex(0, self.x+self.w-1, i, rl.CHAR_DVLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         for i in range(self.x+1,self.x+self.w-1):
-            rl.console_set_char(0, i, self.y, rl.CHAR_DHLINE)
-            rl.console_set_char(0, i, self.y+self.h-1, rl.CHAR_DHLINE)
+            rl.console_put_char_ex(0, i, self.y, rl.CHAR_DHLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
+            rl.console_put_char_ex(0, i, self.y+self.h-1, rl.CHAR_DHLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         if self.title != None: # Draw the title, if present.
             rl.console_print(0,self.x+2,self.y," {0} ".format(self.title))
         rl.console_set_default_foreground(0, oldColor) # Revert color before drawing rest of window.

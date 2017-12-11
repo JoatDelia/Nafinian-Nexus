@@ -9,8 +9,12 @@ class BattleScene: # As the name suggests, the title screen.
         self.infoBox = bx.Box(22,10,37,14,"Combat Log")
         self.turnBox = bx.Box(22,0,20,3,None,"CHARNAME's Turn")
         self.turnOrderBox = bx.Box(42,0,17,10,"Turn Order")
+        self.image = rl.image_load('battlebg.png'.encode()) # Load the test battle background image.
 
     def refresh(self):
+        rl.image_blit_2x(self.image, 0, 22, 0) # Display the title screen image.
+        rl.console_set_default_foreground(0, rl.white) # Sets the foreground (text) color to white.
+        rl.console_set_default_background(0, rl.black) # Sets the background color to black.
         for box in self.partyBoxes:
             box.draw(rl.white)
         for box in self.enemyBoxes:

@@ -5,9 +5,13 @@ import boxes as bx
 class TitleScene: # As the name suggests, the title screen.
     def __init__(self):
         self.box = bx.SelectBox(-1,17,-1,-1,None,("New Game","Continue","Modding","Exit"),-1) # The main menu box.
+        self.image = rl.image_load('nntitle.png'.encode()) # Load the title screen image.
 
     def refresh(self):
-        rl.console_print(0, 7, 2, "#  #  ##  #### ###  #  # ###  ##  #  #     #  # #### #  # #  #  ###\n## # #  # #     #   ## #  #  #  # ## #     ## # #    #  # #  # #\n# ## #### ###   #   # ##  #  #### # ##     # ## ###   ##  #  #  ##\n#  # #  # #     #   #  #  #  #  # #  #     #  # #    #  # #  #    #\n#  # #  # #    ###  #  # ### #  # #  #     #  # #### #  #  ##  ###") # Draw the title.
+        rl.image_blit_2x(self.image, 0, 0, 0) # Display the title screen image.
+        rl.console_set_default_foreground(0, rl.white) # Sets the foreground (text) color to white.
+        rl.console_set_default_background(0, rl.black) # Sets the background color to black.
+        # rl.console_print(0, 7, 2, "#  #  ##  #### ###  #  # ###  ##  #  #     #  # #### #  # #  #  ###\n## # #  # #     #   ## #  #  #  # ## #     ## # #    #  # #  # #\n# ## #### ###   #   # ##  #  #### # ##     # ## ###   ##  #  #  ##\n#  # #  # #     #   #  #  #  #  # #  #     #  # #    #  # #  #    #\n#  # #  # #    ###  #  # ### #  # #  #     #  # #### #  #  ##  ###") # Draw the title.
         self.box.draw() # Draws the menu box on the screen.
     
     def handleInput(self):
