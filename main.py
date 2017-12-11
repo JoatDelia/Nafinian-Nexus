@@ -4,6 +4,8 @@ import _thread as thread
 
 from titlescene import TitleScene
 
+from battlescene import BattleScene
+
 import devscenes
 
 currentScene = TitleScene()
@@ -26,6 +28,8 @@ def main(): # The main function for the game. Individual scenes handle most of t
         command = currentScene.handleInput()
         if command == "TitleScene":
             currentScene = TitleScene()
+        if command == "BattleScene":
+            currentScene = BattleScene()
         if command == "DevMenuScene":
             currentScene = devscenes.DevMenuScene()
     
