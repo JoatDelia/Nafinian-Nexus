@@ -4,15 +4,48 @@ import boxes as bx
 
 import random
 
+import time
+
+# For convenience and code clarity, pseudo-constants representing two of the possible values for animTarget. None of the other values would be directly specified, so they can safely be skipped.
+ALL_ALLIES = 10
+ALL_ENEMIES = 11
+
 class BattleScene: # As the name suggests, the title screen.
     def advanceTurn(self): # Move on to the next turn.
         self.moveBoxes = [] # Close any move boxes that may be open.
         self.turnOrder.append(self.turnOrder.pop(0)) # Send the actor at the front of the line to the back of the line.
+        self.animPhase = 0 # Reset the animation to none.
 
     def addToLog(self,message): # Appends to the log, then clears any lines necessary to make room for the new message.
         self.log.append(message)
         while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>13:
             self.log.pop(0)
+    
+    def parseTurnResults(self,results=None): # This does various things based on what a given turn action returned.
+        if results == None: # If there aren't any results (usually if the move is impossible for some reason), do nothing at all.
+            return
+        self.moveBoxes = [] # Close any move boxes that may be open.
+        if 'log' in results: # If a log entry exists in the results, add it to the logs.
+            self.addToLog(results['log'])
+        if 'animTarget' in results: # If a target for the animation is defined
+            self.animTarget = results['animTarget']
+            if self.animPhase == 0: # If animPhase is 0, change it to 2.
+                self.animPhase = 2
+        elif 'target' in results: # If a target for the move is defined, this means the animTarget needs to be determined from the target provided.
+            if results['target'] in self.party: # If the target can be found in the party...
+                self.animTarget = self.party.index(results['target']) # ...set the animTarget according to where in the array it is found.
+                if self.animPhase == 0: # If animPhase is 0, change it to 2.
+                    self.animPhase = 2
+            elif results['target'] in self.enemies: # Same, but for enemies.
+                self.animTarget = self.enemies.index(results['target']) + 4
+                if self.animPhase == 0:
+                    self.animPhase = 2
+            else: # If the target doesn't exist, as a failsafe, simply don't play an animation.
+                self.animPhase = 0
+        else: # If there is no sort of target specified, don't try to play an animation.
+            self.animPhase = 0
+        if self.animPhase > 0: # If an animation was started, set animStarted accordingly.
+            self.animStarted = time.time()
     
     def __init__(self,newParty,newEnemies):
         self.party = newParty # The adventuring party, retrieved from the previous scene.
@@ -42,24 +75,35 @@ class BattleScene: # As the name suggests, the title screen.
         self.turnBox = bx.Box(22,0,20,3) # This box has no function in itself, but will show whose turn it is via code in refresh().
         self.turnOrderBox = bx.Box(42,0,17,10,"Turn Order") # The idea behind this box should be clear. This one will also be dynamically resized based on party size.
         self.image = rl.image_load('battlebg2.png'.encode()) # Load the test battle background image. This will later be able to be toggled via an option in the options menu.
-        self.moveBoxes = []
+        self.moveBoxes = [] # The boxes for the character's action selection.
+        self.animPhase = 0 # Which phase the animation is in. 1 is playing the animation itself, 2 is the target's box blinking, 0 is no animation.
+        self.animStarted = time.time() # When the current animation phase started. This theoretically doesn't need to be initialized yet, but just in case...
+        self.animTarget = 0 # Who the current animation is playing on. 0-3 are party members, 4-9 are enemies, 10 is all party members, 11 is all enemies.
 
     def refresh(self):
-        # First, handle the flow of combat.
-        if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
-            self.addToLog(self.turnOrder[0].aiAct(self.party)) # Execute the enemy AI, thne add the result to the log.
-            self.advanceTurn() # Move to the next turn.
-        elif len(self.moveBoxes) == 0: # Otherwise, it must be the player's turn. If there aren't any move boxes open, open one.
-            self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,("Attack",),-1))
+        # First, handle the flow of combat or the active animation.
+        if self.animPhase == 2: # If the blinking box phase is active, handle that.
+            if time.time() >= self.animStarted + 0.5: # If a second has passed since this animation phase started, end it.
+                self.animPhase = 0
+                self.advanceTurn() # Move to the next turn.
+        else: # If there is no animation going on, handle the flow of combat.
+            if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
+                self.parseTurnResults(self.turnOrder[0].aiAct(self.party)) # Execute the enemy AI, thne add the result to the log.
+            elif len(self.moveBoxes) == 0: # Otherwise, it must be the player's turn. If there aren't any move boxes open, open one.
+                self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,("Attack",),-1))
         # Now on to the actual display.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes. Only the boxes themselves for now.
             if len(self.party) <= i: # Draw a gray box if party member is not present.
                 box.draw(rl.darkest_gray)
-            else:
-                box.draw(rl.sky) # Otherwise, draw the normal party box.
+            elif self.animPhase == 2 and (self.animTarget == i or self.animTarget == ALL_ALLIES) and int((time.time() - self.animStarted) * 8) % 2 == 0: # If the current animPhase is 2, this is the current animation target, and the time since the animation started dictates the box should be dark red, make it dark red.
+                pass
+            else: # Otherwise, draw the normal party box.
+                box.draw(rl.sky)
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes. Only the boxes themselves for now.
             if len(self.enemies) <= i: # Draw a gray box if enemy is not present.
                 box.draw(rl.darkest_gray)
+            elif self.animPhase == 2 and (self.animTarget - 4 == i or self.animTarget == ALL_ENEMIES) and int((time.time() - self.animStarted) * 8) % 2 == 0: # If the current animPhase is 2, this is the current animation target, and the time since the animation started dictates the box should be dark red, make it dark red.
+                pass
             else:
                 box.draw(rl.crimson) # Otherwise, draw the normal party box.
         self.infoBox.draw(rl.white) # Draw the combat log box.
@@ -101,12 +145,11 @@ class BattleScene: # As the name suggests, the title screen.
         key = rl.console_wait_for_keypress(True) # Halt until a key is pressed. Do nothing withthe key press in this case.
         if key.pressed == True: # Only process key press, not key release.
             if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
-                if len(self.moveBoxes) == 0: # Don't do anything if the menu isn't open.
+                if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
                     return None
                 command = self.moveBoxes[len(self.moveBoxes)-1].forward() # Retrieve the selected option.
                 if command == "Attack": # If the command is to attack, then do so. Later, this will switch to an attack type selector.
-                    self.addToLog(self.party[0].attack(self.enemies[0])) # Do the attack itself.
-                    self.advanceTurn()
+                    self.parseTurnResults(self.party[0].attack(self.enemies[0])) # Do the attack itself.
                 return None
             elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
                 if len(self.moveBoxes) > 0:

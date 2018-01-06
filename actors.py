@@ -23,7 +23,7 @@ class Actor:
         self.hp = self.getMaxHP() # Fully restore HP.
         
     def getMaxHP(self): # Calculate and return max HP.
-        return max(int(self.end/5) + self.getMod(self.end),1) 
+        return max(int(self.end/5) + self.getMod(self.end),1)
     
     def getMod(self,x): # Get the modifier for the specified stat.
         if x <= 5:
@@ -61,7 +61,7 @@ class Actor:
     
     def attack(self,target): # Attack the specified foe. Later on, of course, this will be more complex...
         target.damage(1) # ...but for now, it just deals a flat 1 damage.
-        return self.getColoredName()+" hits "+target.getColoredName()+" for 1 damage." # Return the message to send to the combat log.
+        return {'log': self.getColoredName()+" hits "+target.getColoredName()+" for 1 damage.", 'target': target} # Return the message to send to the combat log.
     
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
         return self.attack(random.choice(party))
