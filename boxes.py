@@ -30,7 +30,6 @@ class Box: # The class for completely non-interactive boxes, superclass for inte
     def draw(self,color=rl.white):
         oldColor = rl.console_get_default_foreground(0) # Store old color.
         rl.console_set_default_foreground(0, color) # Apply window's color.
-        rl.console_rect(0, self.x, self.y, self.w, self.h, True) # Reset background color for the box.
         # Draw the corners.
         rl.console_put_char_ex(0, self.x, self.y, rl.CHAR_DNW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
         rl.console_put_char_ex(0, self.x+self.w-1, self.y, rl.CHAR_DNE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
@@ -59,6 +58,9 @@ class Box: # The class for completely non-interactive boxes, superclass for inte
     
     def goDown(self): # If down or the like is pressed.
         return # Do nothing. This isn't a selection box.
+    
+    def setHeight(self,newH): # This is pretty much just here for the turn order box. Most boxes have no business changing size after creation.
+        self.h = newH
 
 class SelectBox(Box): # This box allows selecting from a number of options.
     def __init__(self,x,y,w,h,title,options,optCap):

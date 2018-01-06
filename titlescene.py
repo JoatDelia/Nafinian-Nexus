@@ -2,16 +2,17 @@ import libtcodpy as rl
 
 import boxes as bx
 
+import actors # This will eventually go unused, but it's temporarily needed.
+
 class TitleScene: # As the name suggests, the title screen.
     def __init__(self):
-        self.box = bx.SelectBox(-1,17,-1,-1,None,("New Game","Continue","Modding","Exit"),-1) # The main menu box.
-        self.image = rl.image_load('nntitle.png'.encode()) # Load the title screen image.
+        self.box = bx.SelectBox(-1,17,-1,-1,None,("New Game","Continue","Modding","Exit"),-1) # The main menu box. In the first demo, New Game and Exit will likely be the only options available.
+        self.image = rl.image_load('nntitle.png'.encode()) # Load the title screen image. A placeholder, at the moment.
 
     def refresh(self):
         rl.image_blit_2x(self.image, 0, 0, 0) # Display the title screen image.
         rl.console_set_default_foreground(0, rl.white) # Sets the foreground (text) color to white.
         rl.console_set_default_background(0, rl.black) # Sets the background color to black.
-        # rl.console_print(0, 7, 2, "#  #  ##  #### ###  #  # ###  ##  #  #     #  # #### #  # #  #  ###\n## # #  # #     #   ## #  #  #  # ## #     ## # #    #  # #  # #\n# ## #### ###   #   # ##  #  #### # ##     # ## ###   ##  #  #  ##\n#  # #  # #     #   #  #  #  #  # #  #     #  # #    #  # #  #    #\n#  # #  # #    ###  #  # ### #  # #  #     #  # #### #  #  ##  ###") # Draw the title.
         self.box.draw() # Draws the menu box on the screen.
     
     def handleInput(self):
@@ -36,7 +37,15 @@ class TitleScene: # As the name suggests, the title screen.
             elif key.vk == rl.KEY_ESCAPE:
                 raise SystemExit # Also exit
                 return None
-            elif key.vk == rl.KEY_F4 and rl.console_is_key_pressed(rl.KEY_ALT):
-                raise SystemExit # Revenge of the exit
-                return None
         return None
+    
+    def getParty(self):
+        newMember = actors.Chara()
+        newMember.setName("Benjamin")
+        return [newMember,]
+        # There is no party yet, so generate a new one. For now, just a dummy one. Later on in development, this will generate an error.
+    
+    def getEnemies(self):
+        newMember = actors.Enemy()
+        newMember.setName("Dust Bunny")
+        return [newMember,]

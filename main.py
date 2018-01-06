@@ -26,11 +26,11 @@ def main(): # The main function for the game. Individual scenes handle most of t
     rl.console_set_background_flag(0, rl.BKGND_SET)
     thread.start_new_thread(refreshDisplay, () ) # Running the display refresh in a separate thread will allow the display to update when the user is not pressing anything. This is mainly useful for combat animations.
     while not rl.console_is_window_closed(): # As long as the X icon is not pressed...
-        command = currentScene.handleInput()
+        command = currentScene.handleInput() # Ask the current scene to handle input for us. In most cases, nothing further needs to be done. However, if a command comes back, we need to change the scene accordingly (invalid commands are ignored).
         if command == "TitleScene":
             currentScene = TitleScene()
         if command == "BattleScene":
-            currentScene = BattleScene()
+            currentScene = BattleScene(currentScene.getParty(),currentScene.getEnemies())
         if command == "DevMenuScene":
             currentScene = devscenes.DevMenuScene()
     
