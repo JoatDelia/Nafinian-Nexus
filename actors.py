@@ -87,6 +87,17 @@ class Actor:
     
     def isDead(self):
         return False
+    
+    def turnStartRegen(self): # Regeneration at the beginning of every turn.
+        message = None # Message to display in the log.
+        if self.isDead(): # The dead don't regenerate (zombies and stuff aside - you know what I meant).
+            return
+        if self.getMod(self.end) >= 0: # Regenerate health, unless Endurance mod is negative.
+            wasUnconscious = self.hp <= 0 # Whether the actor was previously unconscious.
+            self.hp = min(self.hp + 1 + int(self.getMod(self.end)/5),self.getMaxHP()) # Apply HP regeneration.
+            if self.hp > 0 and wasUnconscious:
+                message = self.getColoredName()+" gets back up!"
+        return message
 
 class Chara(Actor):
     def getColoredName(self):

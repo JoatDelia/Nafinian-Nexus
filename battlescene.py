@@ -15,8 +15,13 @@ class BattleScene: # As the name suggests, the title screen.
         self.moveBoxes = [] # Close any move boxes that may be open.
         self.turnOrder.append(self.turnOrder.pop(0)) # Send the actor at the front of the line to the back of the line.
         self.animPhase = 0 # Reset the animation to none.
+        self.addToLog(self.turnOrder[0].turnStartRegen()) # Apply start-of-turn regeneration.
+        if self.turnOrder[0].getHP() <= 0: # Keep advancing turns until a conscious combatant is reached.
+            self.advanceTurn()
 
     def addToLog(self,message): # Appends to the log, then clears any lines necessary to make room for the new message.
+        if message == None: # If nothing was sent, end the function.
+            return
         self.log.append(message)
         while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>12:
             self.log.pop(0)
@@ -104,8 +109,6 @@ class BattleScene: # As the name suggests, the title screen.
                 if self.checkBattleStatus() != None: # If the battle is won or lost, change the current scene.
                     return self.checkBattleStatus()
                 self.advanceTurn() # Move to the next turn.
-                while self.turnOrder[0].getHP() <= 0: # Keep advancing turns until a conscious combatant is reached.
-                    self.advanceTurn()
         else: # If there is no animation going on, handle the flow of combat.
             if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
                 self.parseTurnResults(self.turnOrder[0].aiAct(self.party)) # Execute the enemy AI, thne add the result to the log.
