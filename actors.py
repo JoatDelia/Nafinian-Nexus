@@ -24,12 +24,16 @@ class Actor:
     def healFull(self): # Fill up HP, MP, and AP to full. Remove status effects.
         self.hp = self.getMaxHP() # Fully restore HP.
         self.ap = self.getMaxAP() # Fully restore AP.
+        self.mp = self.getMaxMP() # Fully restore MP.
         
     def getMaxHP(self): # Calculate and return max HP.
         return max(int(self.end/5) + self.getMod(self.end),1)
         
     def getMaxAP(self): # Calculate and return max AP.
         return max(15 + self.getMod(self.end),1)
+        
+    def getMaxMP(self): # Calculate and return max MP.
+        return 12 # Until WIL is introduced, just a flat 12.
     
     def getMod(self,x): # Get the modifier for the specified stat.
         if x <= 5:
@@ -148,6 +152,9 @@ class Chara(Actor):
         
     def getLine2(self): # Return stamina bar and AP.
         return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}AP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),8),chr(rl.COLCTRL_STOP),self.ap,self.getMaxAP())
+        
+    def getLine3(self): # Return stamina bar and AP.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}MP".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.mp,self.getMaxMP(),8),chr(rl.COLCTRL_STOP),self.mp,self.getMaxMP())
 
 class Enemy(Actor):
     def getColoredName(self):
@@ -156,6 +163,7 @@ class Enemy(Actor):
     def getLine1(self): # Return all bars, no numbers.
         returnLine = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),5),chr(rl.COLCTRL_STOP)) # HP bar!
         returnLine += " {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),5),chr(rl.COLCTRL_STOP)) # AP bar!
+        returnLine += " {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.ap,self.getMaxAP(),5),chr(rl.COLCTRL_STOP)) # MP bar!
         # Heart!
         return returnLine # By your powers combined, I am CAPTAIN STATUS!
     
@@ -164,4 +172,7 @@ class Enemy(Actor):
         for member in party:
             if member.getHP() > 0:
                 partyMembersUp.append(member)
-        return self.attack(random.choice(partyMembersUp))
+        moveNum = random.randint(0,1) # Decide randomly what to do.
+        if moveNum == 1 and self.ap >= 3: # If chosen and able to use, do a bite.
+            return self.bite(random.choice(partyMembersUp))
+        return self.attack(random.choice(partyMembersUp)) # If nothing else, just randomly attack.

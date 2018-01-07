@@ -159,6 +159,7 @@ class BattleScene: # As the name suggests, the title screen.
             if not len(self.party) <= i and not self.party[i].isDead(): # Don't draw stats if party member is not present or dead (should still show if merely KO'd.
                 rl.console_print(0, 2, i*6+1, self.party[i].getLine1()) # Draw first line of stats.
                 rl.console_print(0, 2, i*6+2, self.party[i].getLine2()) # Draw second line of stats.
+                rl.console_print(0, 2, i*6+3, self.party[i].getLine3()) # Draw third line of stats.
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes.
             if not len(self.enemies) <= i and not self.enemies[i].getHP() <= 0: # Don't draw stats if enemy is not present or KO'd.
                 rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.
