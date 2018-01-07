@@ -87,8 +87,8 @@ class BattleScene: # As the name suggests, the title screen.
             else:
                 self.enemyBoxes.append(bx.Box(59,i*4,21,4,None))
         self.infoBox = bx.Box(22,10,37,14,"Combat Log") # This box has no function in itself, but will show the combat log via code in refresh().
-        self.turnBox = bx.Box(22,0,20,3) # This box has no function in itself, but will show whose turn it is via code in refresh().
-        self.turnOrderBox = bx.Box(42,0,17,10,"Turn Order") # The idea behind this box should be clear. This one will also be dynamically resized based on party size.
+        self.turnBox = bx.Box(22,0,18,3) # This box has no function in itself, but will show whose turn it is via code in refresh().
+        self.turnOrderBox = bx.Box(40,0,19,10,"Turn Order") # The idea behind this box should be clear. This one will also be dynamically resized based on party size.
         self.image = rl.image_load('battlebg2.png'.encode()) # Load the test battle background image. This will later be able to be toggled via an option in the options menu.
         self.moveBoxes = [] # The boxes for the character's action selection.
         self.animPhase = 0 # Which phase the animation is in. 1 is playing the animation itself, 2 is the target's box blinking, 0 is no animation.
@@ -103,6 +103,8 @@ class BattleScene: # As the name suggests, the title screen.
                 if self.checkBattleStatus() != None: # If the battle is won or lost, change the current scene.
                     return self.checkBattleStatus()
                 self.advanceTurn() # Move to the next turn.
+                while self.turnOrder[0].getHP() <= 0: # Keep advancing turns until a conscious combatant is reached.
+                    self.advanceTurn()
         else: # If there is no animation going on, handle the flow of combat.
             if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
                 self.parseTurnResults(self.turnOrder[0].aiAct(self.party)) # Execute the enemy AI, thne add the result to the log.
@@ -111,32 +113,34 @@ class BattleScene: # As the name suggests, the title screen.
         # Now on to the actual display.
         rl.console_clear(0) # Fill the window the background color.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes. Only the boxes themselves for now.
-            if len(self.party) <= i: # Draw a gray box if party member is not present.
-                box.draw(rl.darkest_gray)
+            if len(self.party) <= i or self.party[i].isDead(): # Draw a gray box if party member is not present or dead.
+                box.draw(rl.darker_gray)
+            if len(self.party) <= i or self.party[i].getHP() <= 0: # Draw a red box if party member is unconscious.
+                box.draw(rl.darker_red)
             elif self.animPhase == 2 and (self.animTarget == i or self.animTarget == ALL_ALLIES) and int((time.time() - self.animStarted) * 8) % 2 == 0: # If the current animPhase is 2, this is the current animation target, and the time since the animation started dictates the box should be dark red, make it dark red.
                 pass
             else: # Otherwise, draw the normal party box.
                 box.draw(rl.sky)
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes. Only the boxes themselves for now.
-            if len(self.enemies) <= i: # Draw a gray box if enemy is not present.
-                box.draw(rl.darkest_gray)
+            if len(self.enemies) <= i or self.enemies[i].getHP() <= 0: # Draw a gray box if enemy is not present or KO'd.
+                box.draw(rl.darker_gray)
             elif self.animPhase == 2 and (self.animTarget - 4 == i or self.animTarget == ALL_ENEMIES) and int((time.time() - self.animStarted) * 8) % 2 == 0: # If the current animPhase is 2, this is the current animation target, and the time since the animation started dictates the box should be dark red, make it dark red.
                 pass
             else:
                 box.draw(rl.crimson) # Otherwise, draw the normal party box.
         self.infoBox.draw(rl.white) # Draw the combat log box.
         self.turnBox.draw(rl.white) # Draw the X's Turn box.
-        rl.console_print_ex(0, 32, 1, rl.BKGND_NONE, rl.CENTER, "{0}".format(self.turnOrder[0].getColoredName())) # Draw whose turn it is.
+        rl.console_print_ex(0, 31, 1, rl.BKGND_NONE, rl.CENTER, "{0}".format(self.turnOrder[0].getColoredName())) # Draw whose turn it is.
         numBattlers = 0 # The number of conscious actors in the fight that will be shown in the turn order box (as such, this should never exceed 7).
         actorList = "" # The list of conscious actors in the fight, in the order they appear in turnOrder.
         for actor in self.turnOrder: # For each actor...
-            if numBattlers < 7 and actor.getHP() > 0: # If they're conscious and the turn order box isn't already filled up...
+            if numBattlers < 8 and actor.getHP() > 0: # If they're conscious and the turn order box isn't already filled up...
                 numBattlers += 1 # Increase the size of the box by one.
                 actorList += actor.getColoredName()+"\n" # Add the battler to the list.
         self.turnOrderBox.setHeight(numBattlers+2) # Adjust the turn order box's size to match the amount of conscious battlers.
         self.turnOrderBox.draw(rl.white) # Draw the turn order box.
-        rl.console_set_char(0, 44, 1, ">") # Draw the cursor in the turn order box. Purely aesthetic.
-        rl.console_print(0, 46, 1, actorList) # Draw the list of conscious battlers in the turn order box.
+        rl.console_set_char(0, 42, 1, ">") # Draw the cursor in the turn order box. Purely aesthetic.
+        rl.console_print(0, 44, 1, actorList) # Draw the list of conscious battlers in the turn order box.
         for i,box in enumerate(self.moveBoxes): # Draw all the move boxes, the current one being yellow.
             if i+1 == len(self.moveBoxes):
                 box.draw(rl.yellow)
@@ -153,10 +157,10 @@ class BattleScene: # As the name suggests, the title screen.
         rl.console_set_default_background(0, rl.black) # Sets the background color to black.
         # However, only after that should the actual stats be drawn. This is so the life bar backgrounds can override the background image.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes.
-            if not len(self.party) <= i: # Draw a gray box if party member is not present.
+            if not len(self.party) <= i and not self.party[i].isDead(): # Don't draw stats if party member is not present or dead (should still show if merely KO'd.
                 rl.console_print(0, 2, i*6+1, self.party[i].getLine1()) # Draw first line of stats.
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes.
-            if not len(self.enemies) <= i: # Draw a gray box if party member is not present.
+            if not len(self.enemies) <= i and not self.enemies[i].getHP() <= 0: # Don't draw stats if enemy is not present or KO'd.
                 rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.
     
     def handleInput(self):
@@ -165,9 +169,7 @@ class BattleScene: # As the name suggests, the title screen.
             if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
                 if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
                     return None
-                command = self.moveBoxes[len(self.moveBoxes)-1].forward() # Retrieve the selected option.
-                if command == "Attack": # If the command is to attack, then do so. Later, this will switch to an attack type selector.
-                    self.parseTurnResults(self.party[0].attack(self.enemies[0])) # Do the attack itself.
+                self.handleCommand(self.moveBoxes[len(self.moveBoxes)-1].forward()) # Retrieve the selected option, then send it to a separate function for processing.
                 return None
             elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
                 if len(self.moveBoxes) > 0:
@@ -184,3 +186,14 @@ class BattleScene: # As the name suggests, the title screen.
                 raise SystemExit # Pressing Alt+F4 is against the laws of the game and is punishable with exile.
                 return None
         return None
+    
+    def handleCommand(self,command): # Handle pressing Enter in a choice box. I put this in a separate function because there will be many options and I don't want the key handling function to get too large.
+        if isinstance(command,int):# If the command is a number, it means (for now) attack that enemy slot.
+            target = self.enemies[command]
+            self.parseTurnResults(self.turnOrder[0].attack(target)) # Do the attack itself.
+        if command == "Attack": # If the command is to attack, then do so. Later, this will switch to an attack type selector.
+            self.openTargetSelect()
+    
+    def openTargetSelect(self): # Opens the target selection window. This will be needed often enough to justify a separate function.
+        previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
+        self.moveBoxes.append(bx.TargetBox(previousBox.getX()+previousBox.getWidth(),3,self.enemies))

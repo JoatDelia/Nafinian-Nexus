@@ -41,12 +41,40 @@ class TitleScene: # As the name suggests, the title screen.
         return None
     
     def getParty(self):
+        members = []
         newMember = actors.Chara()
         newMember.setName("Benjamin")
-        return [newMember,]
+        members.append(newMember)
+        newMember = actors.Chara()
+        newMember.setName("Yorrick")
+        members.append(newMember)
+        newMember = actors.Chara()
+        newMember.setName("Lucy")
+        members.append(newMember)
+        newMember = actors.Chara()
+        newMember.setName("Fera")
+        members.append(newMember)
+        return members
         # There is no party yet, so generate a new one. For now, just a dummy one. Later on in development, this will generate an error.
     
     def getEnemies(self):
+        members = []
         newMember = actors.Enemy()
-        newMember.setName("Dust Bunny")
-        return [newMember,]
+        newMember.setName("Dust Bunny A")
+        members.append(newMember)
+        newMember = actors.Enemy()
+        newMember.setName("Dust Bunny B")
+        members.append(newMember)
+        newMember = actors.Enemy()
+        newMember.setName("Dust Bunny C")
+        members.append(newMember)
+        newMember = actors.Enemy()
+        newMember.setName("Dust Bunny D")
+        members.append(newMember)
+        newMember = actors.Enemy()
+        newMember.setName("Dust Bunny E")
+        members.append(newMember)
+        newMember = actors.Enemy()
+        newMember.setName("Dust Bunny F")
+        members.append(newMember)
+        return members

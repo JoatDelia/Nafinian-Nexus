@@ -61,13 +61,21 @@ class Actor:
     
     def attack(self,target): # Attack the specified foe. Later on, of course, this will be more complex...
         target.damage(1) # ...but for now, it just deals a flat 1 damage.
-        return {'log': self.getColoredName()+" hits "+target.getColoredName()+" for 1 damage.", 'target': target} # Return the message to send to the combat log.
+        message = self.getColoredName()+" hits "+target.getColoredName()+" for 1 damage."
+        if target.getHP() <= 0:
+            message += " Knockout!"
+        if target.isDead(): # This should only ever show for party members.
+            message += " Fatal blow..."
+        return {'log': message, 'target': target} # Return the message to send to the combat log.
     
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
         return self.attack(random.choice(party))
     
     def getHP(self): # Retrieve current (not max) HP.
         return self.hp
+    
+    def isDead(self):
+        return False
 
 class Chara(Actor):
     def getColoredName(self):
@@ -75,6 +83,9 @@ class Chara(Actor):
     
     def isAI(self):
         return False
+        
+    def isDead(self): # Return whether the party member is dead. Meanwhile, enemies don't have a distinction between "dead" and "unconscious", so their isDead() always returns false.
+        return self.hp <= -self.getMaxHP()
         
     def getLine1(self): # Return health bar and HP.
         return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
@@ -87,4 +98,8 @@ class Enemy(Actor):
         return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),5),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
     
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
-        return self.attack(random.choice(party))
+        partyMembersUp = []
+        for member in party:
+            if member.getHP() > 0:
+                partyMembersUp.append(member)
+        return self.attack(random.choice(partyMembersUp))
