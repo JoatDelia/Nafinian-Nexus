@@ -9,9 +9,9 @@ class Actor:
         self.name = "CHARNAME" # The name to display.
     
     def setEnd(self,x): # Set endurance.
-        oldMaxHP = self.getMod(self.end) # Store the old max HP.
+        oldMaxHP = self.getMaxHP() # Store the old max HP.
         self.end = min(x,1000) # Set the stat, but enforce the maximum.
-        self.hp += max(int(self.end/5) + self.getMod(self.end)) - oldMaxHP # Adjust HP accordingly.
+        self.hp = max(self.hp + self.getMaxHP() - oldMaxHP, 1) # Adjust HP accordingly.
     
     def setName(self,x): # Set character's name.
         self.name = x
@@ -59,9 +59,20 @@ class Actor:
     def damage(self,amount): # Lower HP by the given amount. Negative numbers are reduced to 0.
         self.hp -= max(amount,0)
     
-    def attack(self,target): # Attack the specified foe. Later on, of course, this will be more complex...
-        target.damage(1) # ...but for now, it just deals a flat 1 damage.
-        message = self.getColoredName()+" hits "+target.getColoredName()+" for 1 damage."
+    def attack(self,target): # Attack the specified foe.
+        message = "" # The message to send back to the log.
+        hitRoll = random.randint(1,20) # These "rolls" correspond to their tabletop equivalent.
+        dodgeRoll = random.randint(1,20)
+        if dodgeRoll > hitRoll: # Handle misses.
+            message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
+            return {'log': message}
+        damageAmt = random.randint(1,6)+random.randint(1,6)
+        if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
+            damageAmt *= 2
+            message = "{0} critically hits {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
+        else:
+            message = "{0} hits {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+        target.damage(damageAmt) # ...but for now, it just deals 2d6 damage.
         if target.getHP() <= 0:
             message += " Knockout!"
         if target.isDead(): # This should only ever show for party members.

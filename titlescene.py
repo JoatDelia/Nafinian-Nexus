@@ -46,13 +46,15 @@ class TitleScene: # As the name suggests, the title screen.
         newMember.setName("Benjamin")
         members.append(newMember)
         newMember = actors.Chara()
-        newMember.setName("Yorrick")
+        newMember.setName("Gina")
         members.append(newMember)
         newMember = actors.Chara()
-        newMember.setName("Lucy")
+        newMember.setName("Alzoru")
+        newMember.setEnd(65)
         members.append(newMember)
         newMember = actors.Chara()
-        newMember.setName("Fera")
+        newMember.setName("Dismas")
+        newMember.setEnd(70)
         members.append(newMember)
         return members
         # There is no party yet, so generate a new one. For now, just a dummy one. Later on in development, this will generate an error.

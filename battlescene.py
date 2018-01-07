@@ -18,7 +18,7 @@ class BattleScene: # As the name suggests, the title screen.
 
     def addToLog(self,message): # Appends to the log, then clears any lines necessary to make room for the new message.
         self.log.append(message)
-        while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>13:
+        while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>12:
             self.log.pop(0)
     
     def checkBattleStatus(self):
@@ -56,8 +56,9 @@ class BattleScene: # As the name suggests, the title screen.
                     self.animPhase = 2
             else: # If the target doesn't exist, as a failsafe, simply don't play an animation.
                 self.animPhase = 0
-        else: # If there is no sort of target specified, don't try to play an animation.
+        else: # If there is no sort of target specified, don't try to play an animation. Just go on to the next turn.
             self.animPhase = 0
+            self.advanceTurn()
         if self.animPhase > 0: # If an animation was started, set animStarted accordingly.
             self.animStarted = time.time()
     
@@ -149,7 +150,7 @@ class BattleScene: # As the name suggests, the title screen.
         y = 11 # The line to draw the current log entry at.
         for msg in self.log: # Draw the lines of the log, advancing y as appropriate.
             rl.console_set_char(0, 24, y, ">") # Draw something to indicate when a log line starts. This ensures it is clear when one entry ends and a new one begins.
-            rl.console_print_rect(0, 26, y, 33, 12, msg) # Draw the log line.
+            rl.console_print_rect(0, 26, y, 31, 12, msg) # Draw the log line.
             y += rl.console_get_height_rect(0, 0, 0, 32, 12, msg) # Lower the y coordinate.
         # Once all that is drawn, draw the background image.
         rl.image_blit_rect(self.image, 0, 0, 0, 80, 24, rl.BKGND_SET) # Display the battle background image.

@@ -30,6 +30,8 @@ class GameOverScene: # As the name suggests, the title screen.
         key = rl.console_wait_for_keypress(True) # Halt until a key is pressed. Note that this is a blocking function (will not proceed until a key is pressed), and thus should never be used if refresh() is capable of changing the scene.
         if key.pressed == True: # Only process key press, not key release.
             if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
+                if self.box == None: # Don't do anything if there's no box yet.
+                    return None
                 command = self.box.forward() # Retrieve the selected option.
                 if command == "Return to Title":
                     return "TitleScene"
@@ -40,8 +42,5 @@ class GameOverScene: # As the name suggests, the title screen.
                 return None
             elif key.vk == rl.KEY_UP or key.vk == rl.KEY_KP8:
                 self.box.goUp() # Go up one item.
-                return None
-            elif key.vk == rl.KEY_ESCAPE:
-                raise SystemExit # Also exit
                 return None
         return None
