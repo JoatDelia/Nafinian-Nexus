@@ -38,7 +38,7 @@ class BattleScene: # As the name suggests, the title screen.
             if member.getHP() > 0:
                 enemiesAlive = True
         if enemiesAlive == False:
-            return "GameOverScene" # "TitleScene"
+            return "TitleScene"
     
     def parseTurnResults(self,results=None): # This does various things based on what a given turn action returned.
         if results == None: # If there aren't any results (usually if the move is impossible for some reason), do nothing at all.
@@ -163,6 +163,7 @@ class BattleScene: # As the name suggests, the title screen.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes.
             if not len(self.party) <= i and not self.party[i].isDead(): # Don't draw stats if party member is not present or dead (should still show if merely KO'd.
                 rl.console_print(0, 2, i*6+1, self.party[i].getLine1()) # Draw first line of stats.
+                rl.console_print(0, 2, i*6+2, self.party[i].getLine2()) # Draw second line of stats.
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes.
             if not len(self.enemies) <= i and not self.enemies[i].getHP() <= 0: # Don't draw stats if enemy is not present or KO'd.
                 rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.

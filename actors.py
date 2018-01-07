@@ -10,8 +10,10 @@ class Actor:
     
     def setEnd(self,x): # Set endurance.
         oldMaxHP = self.getMaxHP() # Store the old max HP.
+        oldMaxAP = self.getMaxAP() # Store the old max AP.
         self.end = min(x,1000) # Set the stat, but enforce the maximum.
         self.hp = max(self.hp + self.getMaxHP() - oldMaxHP, 1) # Adjust HP accordingly.
+        self.ap = max(self.ap + self.getMaxAP() - oldMaxAP, 1) # Adjust AP accordingly.
     
     def setName(self,x): # Set character's name.
         self.name = x
@@ -21,9 +23,13 @@ class Actor:
     
     def healFull(self): # Fill up HP, MP, and AP to full. Remove status effects.
         self.hp = self.getMaxHP() # Fully restore HP.
+        self.ap = self.getMaxAP() # Fully restore AP.
         
     def getMaxHP(self): # Calculate and return max HP.
         return max(int(self.end/5) + self.getMod(self.end),1)
+        
+    def getMaxAP(self): # Calculate and return max AP.
+        return max(15 + self.getMod(self.end),1)
     
     def getMod(self,x): # Get the modifier for the specified stat.
         if x <= 5:
@@ -75,7 +81,7 @@ class Actor:
         target.damage(damageAmt) # ...but for now, it just deals 2d6 damage.
         if target.getHP() <= 0:
             message += " Knockout!"
-        if target.isDead(): # This should only ever show for party members.
+        if target.isDead() and isinstance(target, Chara): # This should only ever show for party members.
             message += " Fatal blow..."
         return {'log': message, 'target': target} # Return the message to send to the combat log.
     
@@ -86,7 +92,7 @@ class Actor:
         return self.hp
     
     def isDead(self):
-        return False
+        return self.hp <= 0
     
     def turnStartRegen(self): # Regeneration at the beginning of every turn.
         message = None # Message to display in the log.
@@ -111,13 +117,19 @@ class Chara(Actor):
         
     def getLine1(self): # Return health bar and HP.
         return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
+        
+    def getLine2(self): # Return stamina bar and AP.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}AP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),8),chr(rl.COLCTRL_STOP),self.ap,self.getMaxAP())
 
 class Enemy(Actor):
     def getColoredName(self):
         return chr(rl.COLCTRL_FORE_RGB)+chr(255)+chr(1)+chr(63)+self.name+chr(rl.COLCTRL_STOP)
         
     def getLine1(self): # Return all bars, no numbers.
-        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),5),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
+        returnLine = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),5),chr(rl.COLCTRL_STOP)) # HP bar!
+        returnLine += " {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),5),chr(rl.COLCTRL_STOP)) # AP bar!
+        # Heart!
+        return returnLine # By your powers combined, I am CAPTAIN STATUS!
     
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
         partyMembersUp = []
