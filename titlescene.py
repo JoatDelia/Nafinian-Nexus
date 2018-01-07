@@ -10,13 +10,14 @@ class TitleScene: # As the name suggests, the title screen.
         self.image = rl.image_load('nntitle.png'.encode()) # Load the title screen image. A placeholder, at the moment.
 
     def refresh(self):
+        rl.console_clear(0) # Fill the window the background color.
         rl.image_blit_2x(self.image, 0, 0, 0) # Display the title screen image.
         rl.console_set_default_foreground(0, rl.white) # Sets the foreground (text) color to white.
         rl.console_set_default_background(0, rl.black) # Sets the background color to black.
         self.box.draw() # Draws the menu box on the screen.
     
     def handleInput(self):
-        key = rl.console_wait_for_keypress(True) # Halt until a key is pressed. Do nothing withthe key press in this case.
+        key = rl.console_wait_for_keypress(True) # Halt until a key is pressed. Note that this is a blocking function (will not proceed until a key is pressed), and thus should never be used if refresh() is capable of changing the scene.
         if key.pressed == True: # Only process key press, not key release.
             if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
                 command = self.box.forward() # Retrieve the selected option.

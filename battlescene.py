@@ -21,6 +21,20 @@ class BattleScene: # As the name suggests, the title screen.
         while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>13:
             self.log.pop(0)
     
+    def checkBattleStatus(self):
+        partyAlive = False
+        for member in self.party:
+            if member.getHP() > 0:
+                partyAlive = True
+        if partyAlive == False:
+            return "GameOverScene"
+        enemiesAlive = False
+        for member in self.enemies:
+            if member.getHP() > 0:
+                enemiesAlive = True
+        if enemiesAlive == False:
+            return "GameOverScene" # "TitleScene"
+    
     def parseTurnResults(self,results=None): # This does various things based on what a given turn action returned.
         if results == None: # If there aren't any results (usually if the move is impossible for some reason), do nothing at all.
             return
@@ -50,6 +64,7 @@ class BattleScene: # As the name suggests, the title screen.
     def __init__(self,newParty,newEnemies):
         self.party = newParty # The adventuring party, retrieved from the previous scene.
         self.enemies = newEnemies # The enemies. Will later be retrieved from the previous scene, but for now will just be generated on the spot.
+        self.nextScene = None # The scene to advance to. This is meant for when one side loses.
         # Determine turn order.
         self.turnOrder = [] # Store the turn order.
         for ally in self.party: # Add all allies.
@@ -85,6 +100,8 @@ class BattleScene: # As the name suggests, the title screen.
         if self.animPhase == 2: # If the blinking box phase is active, handle that.
             if time.time() >= self.animStarted + 0.5: # If a second has passed since this animation phase started, end it.
                 self.animPhase = 0
+                if self.checkBattleStatus() != None: # If the battle is won or lost, change the current scene.
+                    return self.checkBattleStatus()
                 self.advanceTurn() # Move to the next turn.
         else: # If there is no animation going on, handle the flow of combat.
             if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
@@ -92,6 +109,7 @@ class BattleScene: # As the name suggests, the title screen.
             elif len(self.moveBoxes) == 0: # Otherwise, it must be the player's turn. If there aren't any move boxes open, open one.
                 self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,("Attack",),-1))
         # Now on to the actual display.
+        rl.console_clear(0) # Fill the window the background color.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes. Only the boxes themselves for now.
             if len(self.party) <= i: # Draw a gray box if party member is not present.
                 box.draw(rl.darkest_gray)
@@ -142,7 +160,7 @@ class BattleScene: # As the name suggests, the title screen.
                 rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.
     
     def handleInput(self):
-        key = rl.console_wait_for_keypress(True) # Halt until a key is pressed. Do nothing withthe key press in this case.
+        key = rl.console_check_for_keypress(rl.KEY_PRESSED) # Check if a key was pressed, but keep going if none was. Doing this instead of console_wait_for_keypress because if I use blocking input and the scene is changed due to something that isn't player input (for example, the enemies winning), then the scene would change while the game is still waiting for input to be processed by THIS scene, meaning the first key press after the transition would do nothing. Technically harmless, but annoying and unprofessional-looking.
         if key.pressed == True: # Only process key press, not key release.
             if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
                 if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
