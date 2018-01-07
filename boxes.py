@@ -149,43 +149,14 @@ class SelectBox(Box): # This box allows selecting from a number of options.
             self.optOffset = self.selectedOption - self.optCap + 1
 
 class TargetBox(SelectBox): # This box allows selecting between conscious enemies.
-    def __init__(self,x,y,enemies):
+    def __init__(self,x,y,members):
         options = [] # A temporary array for the visible options for the selection box.
-        self.enemyIDs = [] # An array of the enemy IDs (where they appear in the array) that correspond to the selections.
-        for i,enemy in enumerate(enemies):
-            if enemy.getHP() > 0:
-                options.append(enemy.getName())
-                self.enemyIDs.append(i)
+        self.members = [] # An array of the enemy IDs (where they appear in the array) that correspond to the selections.
+        for member in members:
+            if not member.isDead():
+                options.append(member.getName())
+                self.members.append(member)
         super().__init__(x,y,-1,-1,None,options,-1)
     
-    def draw(self,color=rl.white):
-        oldColor = rl.console_get_default_foreground(0) # Store old color.
-        rl.console_set_default_foreground(0, color) # Apply window's color.
-        rl.console_rect(0, self.x, self.y, self.w, self.h, True) # Reset background color for the box.
-        # Draw the corners.
-        rl.console_put_char_ex(0, self.x, self.y, rl.CHAR_DNW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-        rl.console_put_char_ex(0, self.x+self.w-1, self.y, rl.CHAR_DNE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-        rl.console_put_char_ex(0, self.x, self.y+self.h-1, rl.CHAR_DSW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-        rl.console_put_char_ex(0, self.x+self.w-1, self.y+self.h-1, rl.CHAR_DSE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-        # Draw the walls.
-        for i in range(self.y+1,self.y+self.h-1):
-            rl.console_put_char_ex(0, self.x, i, rl.CHAR_DVLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-            rl.console_put_char_ex(0, self.x+self.w-1, i, rl.CHAR_DVLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-        for i in range(self.x+1,self.x+self.w-1):
-            rl.console_put_char_ex(0, i, self.y, rl.CHAR_DHLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-            rl.console_put_char_ex(0, i, self.y+self.h-1, rl.CHAR_DHLINE, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
-        if self.title != None: # Draw the title, if present.
-            rl.console_print(0,self.x+2,self.y," {0} ".format(self.title))
-        rl.console_set_default_foreground(0, oldColor) # Revert color before drawing rest of window.
-        for i,option in enumerate(self.options[self.optOffset:min(self.optOffset+self.optCap,len(self.options))]): # Draw the options.
-            rl.console_print(0, self.x+4, self.y+1+i, option)
-        rl.console_print(0, self.x+2, self.y+1+self.selectedOption-self.optOffset, chr(rl.CHAR_ARROW2_E))
-        # Draw scroll arrows as needed.
-        if int(time.clock()*2) % 2 == 0:
-            if self.optOffset > 0:
-                rl.console_print(0, self.x+int(self.w/2), self.y, chr(rl.CHAR_ARROW2_N))
-            if self.optOffset + self.optCap < len(self.options):
-                rl.console_print(0, self.x+int(self.w/2), self.y+self.h-1, chr(rl.CHAR_ARROW2_S))
-    
     def forward(self): # If enter or the like is pressed and this is the active box.
-        return self.enemyIDs[self.selectedOption] # Return the selected item's ID, not the item itself.
+        return self.members[self.selectedOption] # Return the selected item's ID, not the item itself.

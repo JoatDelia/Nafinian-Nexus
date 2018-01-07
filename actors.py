@@ -44,12 +44,21 @@ class Actor:
         return "Use subclass!"
     
     def getOptions(self): # Get the basic options for a party member, or a controlled enemy.
-        return ["Attack",]
+        moves = ["Attack",]
+        if len(self.getSpellOptions()) > 0:
+            moves.append("Magic")
+        return moves
     
     def getAttackOptions(self): # Get options if Attack is chosen.
         moves = ["Basic",]
         if (self.name == "Gina" or self.name == "Alzoru") and self.ap >= 3: # Later on, this will be determined by race and class. Neither exist yet, though, so...
             moves.append("Bite")
+        return moves
+        
+    def getSpellOptions(self): # Get options if Magic is chosen.
+        moves = []
+        if self.name == "Gina" and self.mp >= 3: # Again, this won't be hard-coded by name in the final game, of course.
+            moves.append("Heal I")
         return moves
     
     def isAI(self): # Whether the character is controlled by the AI.
@@ -73,6 +82,11 @@ class Actor:
         self.hp -= max(amount,0)
         if self.hp <= 0: # AP is reduced to 0 on KO.
             self.ap = 0
+    
+    def heal(self,amount): # Raise HP by the given amount. Negative numbers are reduced to 0.
+        self.hp += max(amount,0)
+        if self.hp > self.getMaxHP(): # Enforce the health cap.
+            self.hp = self.getMaxHP()
     
     def attack(self,target): # Attack the specified foe.
         message = "" # The message to send back to the log.
@@ -115,6 +129,18 @@ class Actor:
             message += " Fatal blow..."
         return {'log': message, 'target': target} # Return the message to send to the combat log.
     
+    def castHealI(self,target): # Cast Heal I on the specified ally.
+        if target.hp == target.getMaxHP():
+            return {'log': target.getColoredName()+" is already at full health!", 'cancel': None}
+        self.mp -= 3 # Remove MP for Heal I. This is a flat 3 for now, since Heal I is a cross-class spell for Gina, but later there would be a check for circumstances like that.
+        healAmt = random.randint(1,4)
+        message = "{0} casts Heal I on {1}, restoring {2}HP.".format(self.getColoredName(),target.getColoredName(),healAmt)
+        wasUnconscious = target.hp <= 0 # Whether the actor was previously unconscious.
+        target.heal(healAmt)
+        if target.hp > 0 and wasUnconscious:
+            message += " "+target.getColoredName()+" gets back up!"
+        return {'log': message} # Return the message to send to the combat log.
+    
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
         return self.attack(random.choice(party))
     
@@ -135,6 +161,8 @@ class Actor:
                 message = self.getColoredName()+" gets back up!"
         if self.getMod(self.end) >= 0 and self.hp > 0: # Regenerate stamina, unless Endurance mod is negative or character is unconscious.
             self.ap = min(self.ap + 1 + int(self.getMod(self.end)/10),self.getMaxAP()) # Apply AP regeneration.
+        if self.getMod(self.end) >= 0 and self.hp > 0: # Regenerate mana.
+            self.mp = min(self.mp + 1, self.getMaxMP()) # Apply MP regeneration.
         return message
 
 class Chara(Actor):

@@ -6,6 +6,8 @@ import random
 
 import time
 
+from actors import Chara,Enemy
+
 # For convenience and code clarity, pseudo-constants representing two of the possible values for animTarget. None of the other values would be directly specified, so they can safely be skipped.
 ALL_ALLIES = 10
 ALL_ENEMIES = 11
@@ -43,9 +45,11 @@ class BattleScene: # As the name suggests, the title screen.
     def parseTurnResults(self,results=None): # This does various things based on what a given turn action returned.
         if results == None: # If there aren't any results (usually if the move is impossible for some reason), do nothing at all.
             return
-        self.moveBoxes = [] # Close any move boxes that may be open.
         if 'log' in results: # If a log entry exists in the results, add it to the logs.
             self.addToLog(results['log'])
+        if 'cancel' in results: # If a cancel entry exists in the results (the value doesn't matter), stop here.
+            return
+        self.moveBoxes = [] # Close any move boxes that may be open.
         if 'animTarget' in results: # If a target for the animation is defined
             self.animTarget = results['animTarget']
             if self.animPhase == 0: # If animPhase is 0, change it to 2.
@@ -194,19 +198,29 @@ class BattleScene: # As the name suggests, the title screen.
         return None
     
     def handleCommand(self,command): # Handle pressing Enter in a choice box. I put this in a separate function because there will be many options and I don't want the key handling function to get too large.
-        if isinstance(command,int):# If the command is a number, it means (for now) attack that enemy slot.
-            target = self.enemies[command]
+        if isinstance(command,Enemy):# If the command is an enemy use the move on said enemy.
+            target = command
             previousCommand = self.moveBoxes[len(self.moveBoxes)-2].forward()
             if previousCommand == "Bite":
                 self.parseTurnResults(self.turnOrder[0].bite(target)) # Do the bite special attack.
             else:
                 self.parseTurnResults(self.turnOrder[0].attack(target)) # Do the attack itself.
-        if command == "Attack": # If the command is to attack, then do so. Later, this will switch to an attack type selector.
+        if isinstance(command,Chara):# If the command is an ally use the move on said ally.
+            target = command
+            previousCommand = self.moveBoxes[len(self.moveBoxes)-2].forward()
+            if previousCommand == "Heal I":
+                self.parseTurnResults(self.turnOrder[0].castHealI(target)) # Cast Heal I.
+        if command == "Attack": # Opten a box to select attack type.
             previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
             self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getAttackOptions(),-1))
+        if command == "Magic": # Open a box to select magic type.
+            previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
+            self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getSpellOptions(),-1))
         if command == "Basic" or command == "Bite":
-            self.openTargetSelect()
+            self.openTargetSelect(self.enemies)
+        if command == "Heal I":
+            self.openTargetSelect(self.party)
     
-    def openTargetSelect(self): # Opens the target selection window. This will be needed often enough to justify a separate function.
+    def openTargetSelect(self, arrayToUse): # Opens the target selection window. This will be needed often enough to justify a separate function. If enemies is false, select from allies instead.
         previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
-        self.moveBoxes.append(bx.TargetBox(previousBox.getX()+previousBox.getWidth(),3,self.enemies))
+        self.moveBoxes.append(bx.TargetBox(previousBox.getX()+previousBox.getWidth(),3,arrayToUse))
