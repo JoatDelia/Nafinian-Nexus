@@ -43,7 +43,10 @@ class Actor:
         return ["Attack",]
     
     def getAttackOptions(self): # Get options if Attack is chosen.
-        return ["Basic",]
+        moves = ["Basic",]
+        if (self.name == "Gina" or self.name == "Alzoru") and self.ap >= 3: # Later on, this will be determined by race and class. Neither exist yet, though, so...
+            moves.append("Bite")
+        return moves
     
     def isAI(self): # Whether the character is controlled by the AI.
         return True
@@ -64,6 +67,8 @@ class Actor:
     
     def damage(self,amount): # Lower HP by the given amount. Negative numbers are reduced to 0.
         self.hp -= max(amount,0)
+        if self.hp <= 0: # AP is reduced to 0 on KO.
+            self.ap = 0
     
     def attack(self,target): # Attack the specified foe.
         message = "" # The message to send back to the log.
@@ -78,6 +83,27 @@ class Actor:
             message = "{0} critically hits {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
         else:
             message = "{0} hits {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+        target.damage(damageAmt) # ...but for now, it just deals 2d6 damage.
+        if target.getHP() <= 0:
+            message += " Knockout!"
+        if target.isDead() and isinstance(target, Chara): # This should only ever show for party members.
+            message += " Fatal blow..."
+        return {'log': message, 'target': target} # Return the message to send to the combat log.
+    
+    def bite(self,target): # Bite the specified foe.
+        self.ap -= 3 # Remove AP for bite. No need to check here - if the character has insufficient AP, Bite shouldn't appear in the first place.
+        message = "" # The message to send back to the log.
+        hitRoll = random.randint(1,20) # These "rolls" correspond to their tabletop equivalent.
+        dodgeRoll = random.randint(1,20)
+        if dodgeRoll > hitRoll: # Handle misses.
+            message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
+            return {'log': message}
+        damageAmt = random.randint(9,18)
+        if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
+            damageAmt *= 2
+            message = "{0} critically bites {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
+        else:
+            message = "{0} bites {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
         target.damage(damageAmt) # ...but for now, it just deals 2d6 damage.
         if target.getHP() <= 0:
             message += " Knockout!"
@@ -103,6 +129,8 @@ class Actor:
             self.hp = min(self.hp + 1 + int(self.getMod(self.end)/5),self.getMaxHP()) # Apply HP regeneration.
             if self.hp > 0 and wasUnconscious:
                 message = self.getColoredName()+" gets back up!"
+        if self.getMod(self.end) >= 0 and self.hp > 0: # Regenerate stamina, unless Endurance mod is negative or character is unconscious.
+            self.ap = min(self.ap + 1 + int(self.getMod(self.end)/10),self.getMaxAP()) # Apply AP regeneration.
         return message
 
 class Chara(Actor):

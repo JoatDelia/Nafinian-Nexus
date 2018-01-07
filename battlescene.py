@@ -113,7 +113,7 @@ class BattleScene: # As the name suggests, the title screen.
             if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
                 self.parseTurnResults(self.turnOrder[0].aiAct(self.party)) # Execute the enemy AI, thne add the result to the log.
             elif len(self.moveBoxes) == 0: # Otherwise, it must be the player's turn. If there aren't any move boxes open, open one.
-                self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,("Attack",),-1))
+                self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,self.turnOrder[0].getOptions(),-1))
         # Now on to the actual display.
         rl.console_clear(0) # Fill the window the background color.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes. Only the boxes themselves for now.
@@ -145,11 +145,6 @@ class BattleScene: # As the name suggests, the title screen.
         self.turnOrderBox.draw(rl.white) # Draw the turn order box.
         rl.console_set_char(0, 42, 1, ">") # Draw the cursor in the turn order box. Purely aesthetic.
         rl.console_print(0, 44, 1, actorList) # Draw the list of conscious battlers in the turn order box.
-        for i,box in enumerate(self.moveBoxes): # Draw all the move boxes, the current one being yellow.
-            if i+1 == len(self.moveBoxes):
-                box.draw(rl.yellow)
-            else:
-                box.draw(rl.white)
         y = 11 # The line to draw the current log entry at.
         for msg in self.log: # Draw the lines of the log, advancing y as appropriate.
             rl.console_set_char(0, 24, y, ">") # Draw something to indicate when a log line starts. This ensures it is clear when one entry ends and a new one begins.
@@ -167,6 +162,11 @@ class BattleScene: # As the name suggests, the title screen.
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes.
             if not len(self.enemies) <= i and not self.enemies[i].getHP() <= 0: # Don't draw stats if enemy is not present or KO'd.
                 rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.
+        for i,box in enumerate(self.moveBoxes): # Draw all the move boxes, the current one being yellow. Since this can overlap the enemy stats, this must be drawn after that.
+            if i+1 == len(self.moveBoxes):
+                box.draw(rl.yellow)
+            else:
+                box.draw(rl.white)
     
     def handleInput(self):
         key = rl.console_check_for_keypress(rl.KEY_PRESSED) # Check if a key was pressed, but keep going if none was. Doing this instead of console_wait_for_keypress because if I use blocking input and the scene is changed due to something that isn't player input (for example, the enemies winning), then the scene would change while the game is still waiting for input to be processed by THIS scene, meaning the first key press after the transition would do nothing. Technically harmless, but annoying and unprofessional-looking.
@@ -195,8 +195,15 @@ class BattleScene: # As the name suggests, the title screen.
     def handleCommand(self,command): # Handle pressing Enter in a choice box. I put this in a separate function because there will be many options and I don't want the key handling function to get too large.
         if isinstance(command,int):# If the command is a number, it means (for now) attack that enemy slot.
             target = self.enemies[command]
-            self.parseTurnResults(self.turnOrder[0].attack(target)) # Do the attack itself.
+            previousCommand = self.moveBoxes[len(self.moveBoxes)-2].forward()
+            if previousCommand == "Bite":
+                self.parseTurnResults(self.turnOrder[0].bite(target)) # Do the bite special attack.
+            else:
+                self.parseTurnResults(self.turnOrder[0].attack(target)) # Do the attack itself.
         if command == "Attack": # If the command is to attack, then do so. Later, this will switch to an attack type selector.
+            previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
+            self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getAttackOptions(),-1))
+        if command == "Basic" or command == "Bite":
             self.openTargetSelect()
     
     def openTargetSelect(self): # Opens the target selection window. This will be needed often enough to justify a separate function.
