@@ -44,6 +44,7 @@ class TitleScene: # As the name suggests, the title screen.
         members = []
         newMember = actors.Chara()
         newMember.setName("Benjamin")
+        newMember.setEnd(35)
         members.append(newMember)
         newMember = actors.Chara()
         newMember.setName("Gina")

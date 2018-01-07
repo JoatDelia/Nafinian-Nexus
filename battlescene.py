@@ -153,7 +153,7 @@ class BattleScene: # As the name suggests, the title screen.
         for msg in self.log: # Draw the lines of the log, advancing y as appropriate.
             rl.console_set_char(0, 24, y, ">") # Draw something to indicate when a log line starts. This ensures it is clear when one entry ends and a new one begins.
             rl.console_print_rect(0, 26, y, 31, 12, msg) # Draw the log line.
-            y += rl.console_get_height_rect(0, 0, 0, 32, 12, msg) # Lower the y coordinate.
+            y += rl.console_get_height_rect(0, 0, 0, 31, 12, msg) # Lower the y coordinate.
         # Once all that is drawn, draw the background image.
         rl.image_blit_rect(self.image, 0, 0, 0, 80, 24, rl.BKGND_SET) # Display the battle background image.
         rl.console_set_default_foreground(0, rl.white) # Sets the foreground (text) color to white.
@@ -201,7 +201,9 @@ class BattleScene: # As the name suggests, the title screen.
         if isinstance(command,Enemy):# If the command is an enemy use the move on said enemy.
             target = command
             previousCommand = self.moveBoxes[len(self.moveBoxes)-2].forward()
-            if previousCommand == "Bite":
+            if previousCommand == "Fire I":
+                self.parseTurnResults(self.turnOrder[0].castFireI(target)) # Cast the Fire I spell.
+            elif previousCommand == "Bite":
                 self.parseTurnResults(self.turnOrder[0].bite(target)) # Do the bite special attack.
             else:
                 self.parseTurnResults(self.turnOrder[0].attack(target)) # Do the attack itself.
@@ -216,7 +218,7 @@ class BattleScene: # As the name suggests, the title screen.
         if command == "Magic": # Open a box to select magic type.
             previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
             self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getSpellOptions(),-1))
-        if command == "Basic" or command == "Bite":
+        if command == "Basic" or command == "Bite" or command == "Fire I":
             self.openTargetSelect(self.enemies)
         if command == "Heal I":
             self.openTargetSelect(self.party)

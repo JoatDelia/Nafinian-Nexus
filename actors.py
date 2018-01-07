@@ -59,6 +59,8 @@ class Actor:
         moves = []
         if self.name == "Gina" and self.mp >= 3: # Again, this won't be hard-coded by name in the final game, of course.
             moves.append("Heal I")
+        if self.name == "Benjamin" and self.mp >= 3: # Again, this won't be hard-coded by name in the final game, of course.
+            moves.append("Fire I")
         return moves
     
     def isAI(self): # Whether the character is controlled by the AI.
@@ -95,7 +97,7 @@ class Actor:
         if dodgeRoll > hitRoll: # Handle misses.
             message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
-        damageAmt = random.randint(1,6)+random.randint(1,6)
+        damageAmt = max(random.randint(1,6)+random.randint(1,6)+self.getAttackMod()-target.getDefenseMod(),0)
         if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
             damageAmt *= 2
             message = "{0} critically hits {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
@@ -116,7 +118,7 @@ class Actor:
         if dodgeRoll > hitRoll: # Handle misses.
             message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
-        damageAmt = random.randint(9,18)
+        damageAmt = max(random.randint(9,18)+self.getAttackMod()-target.getDefenseMod(),0)
         if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
             damageAmt *= 2
             message = "{0} critically bites {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
@@ -141,11 +143,61 @@ class Actor:
             message += " "+target.getColoredName()+" gets back up!"
         return {'log': message} # Return the message to send to the combat log.
     
+    def castFireI(self,target): # Cast Fire I the specified foe.
+        self.mp -= 3 # Remove MP for Fire I.
+        message = "" # The message to send back to the log.
+        hitRoll = random.randint(1,20) # These "rolls" correspond to their tabletop equivalent.
+        dodgeRoll = random.randint(1,20)
+        if dodgeRoll > hitRoll: # Handle misses.
+            message = "{0} casts Fire I, but misses {1}.".format(self.getColoredName(),target.getColoredName())
+            return {'log': message}
+        damageAmt = max(random.randint(1,6)-target.getSpecialDefenseMod(),0)
+        message = "{0} casts Fire I on {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+        target.damage(damageAmt)
+        if target.getHP() <= 0:
+            message += " Knockout!"
+        if target.isDead() and isinstance(target, Chara): # This should only ever show for party members.
+            message += " Fatal blow..."
+        return {'log': message, 'target': target} # Return the message to send to the combat log.
+    
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
         return self.attack(random.choice(party))
     
     def getHP(self): # Retrieve current (not max) HP.
         return self.hp
+        
+    def getAttackMod(self): # Later, this will prperly calculate from the party's equipment. Equipment doesn't exist yet, so it's being simulated in this case.
+        if self.name == "Benjamin": # Simulating Quartz Orb
+            return 3
+        if self.name == "Gina": # Simulating Quartz Orb
+            return 3
+        if self.name == "Alzoru": # Simulating Shell Ocarina
+            return 2
+        if self.name == "Dismas": # Simulating Worn Knife
+            return 4
+        return 0 # For anyone else, don't simulate equipment.
+    
+    def getDefenseMod(self): # Same applies here as to getAttackMod.
+        if self.name == "Benjamin": # Simulating Circular Wood Shield
+            return 2 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+        if self.name == "Gina": # Simulating Circular Wood Shield
+            return 2 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+        if self.name == "Alzoru": # Simulating Anikto leather tunic, Anikto leather waistcoat
+            return 5 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+        if self.name == "Dismas": # Simulating Leather Waistcoat
+            return 2 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+        return self.getMod(self.end) + random.randint(1,6) + random.randint(1,6) # For anyone else, don't simulate equipment.
+    
+    def getSpecialDefenseMod(self): # Same as getDefenseMod, but using Willpower.
+        if self.name == "Benjamin": # Simulating Circular Wood Shield
+            return 2 + random.randint(1,6) + random.randint(1,6)
+        if self.name == "Gina": # Simulating Circular Wood Shield
+            return 2 + random.randint(1,6) + random.randint(1,6)
+        if self.name == "Alzoru": # Simulating Anikto leather tunic, Anikto leather waistcoat
+            return 5 + random.randint(1,6) + random.randint(1,6)
+        if self.name == "Dismas": # Simulating Leather Waistcoat
+            return 2 + random.randint(1,6) + random.randint(1,6)
+        return random.randint(1,6) + random.randint(1,6) # For anyone else, don't simulate equipment.
     
     def isDead(self):
         return self.hp <= 0
@@ -173,10 +225,13 @@ class Chara(Actor):
         return False
         
     def isDead(self): # Return whether the party member is dead. Meanwhile, enemies don't have a distinction between "dead" and "unconscious", so their isDead() always returns false.
-        return self.hp <= -self.getMaxHP()
+        return self.hp <= -max(self.getMaxHP(),10)
         
     def getLine1(self): # Return health bar and HP.
-        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
+        if self.hp > 0:
+            return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
+        else:
+            return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(128),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(32),chr(32),chr(32),self.makeBar(max(self.getMaxHP(),10)+self.hp,max(self.getMaxHP(),10),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
         
     def getLine2(self): # Return stamina bar and AP.
         return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}AP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),8),chr(rl.COLCTRL_STOP),self.ap,self.getMaxAP())
@@ -191,7 +246,7 @@ class Enemy(Actor):
     def getLine1(self): # Return all bars, no numbers.
         returnLine = "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),5),chr(rl.COLCTRL_STOP)) # HP bar!
         returnLine += " {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),5),chr(rl.COLCTRL_STOP)) # AP bar!
-        returnLine += " {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.ap,self.getMaxAP(),5),chr(rl.COLCTRL_STOP)) # MP bar!
+        returnLine += " {0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.mp,self.getMaxMP(),5),chr(rl.COLCTRL_STOP)) # MP bar!
         # Heart!
         return returnLine # By your powers combined, I am CAPTAIN STATUS!
     
@@ -200,7 +255,9 @@ class Enemy(Actor):
         for member in party:
             if member.getHP() > 0:
                 partyMembersUp.append(member)
-        moveNum = random.randint(0,1) # Decide randomly what to do.
-        if moveNum == 1 and self.ap >= 3: # If chosen and able to use, do a bite.
+        moveNum = random.randint(0,2) # Decide randomly what to do.
+        if moveNum == 2 and self.ap >= 3: # If chosen and able to use, do Fire I.
+            return self.castFireI(random.choice(partyMembersUp))
+        elif moveNum == 1 and self.ap >= 3: # If chosen and able to use, do a bite.
             return self.bite(random.choice(partyMembersUp))
         return self.attack(random.choice(partyMembersUp)) # If nothing else, just randomly attack.
