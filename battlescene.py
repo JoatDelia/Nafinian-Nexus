@@ -15,6 +15,7 @@ ALL_ENEMIES = 11
 class BattleScene: # As the name suggests, the title screen.
     def advanceTurn(self): # Move on to the next turn.
         self.moveBoxes = [] # Close any move boxes that may be open.
+        self.turnOrder[0].decrementStatusEffects() # Decrement status effects of the old active combatant.
         self.turnOrder.append(self.turnOrder.pop(0)) # Send the actor at the front of the line to the back of the line.
         self.animPhase = 0 # Reset the animation to none.
         self.addToLog(self.turnOrder[0].turnStartRegen()) # Apply start-of-turn regeneration.
@@ -52,7 +53,7 @@ class BattleScene: # As the name suggests, the title screen.
         self.moveBoxes = [] # Close any move boxes that may be open.
         if 'animTarget' in results: # If a target for the animation is defined
             self.animTarget = results['animTarget']
-            if self.animPhase == 0: # If animPhase is 0, change it to 2.
+            if self.animPhas/e == 0: # If animPhase is 0, change it to 2.
                 self.animPhase = 2
         elif 'target' in results: # If a target for the move is defined, this means the animTarget needs to be determined from the target provided.
             if results['target'] in self.party: # If the target can be found in the party...
@@ -115,7 +116,7 @@ class BattleScene: # As the name suggests, the title screen.
                 self.advanceTurn() # Move to the next turn.
         else: # If there is no animation going on, handle the flow of combat.
             if self.turnOrder[0].isAI(): # If it's an enemy's turn, act according to their AI.
-                self.parseTurnResults(self.turnOrder[0].aiAct(self.party)) # Execute the enemy AI, thne add the result to the log.
+                self.parseTurnResults(self.turnOrder[0].aiAct(self.party,self.enemies)) # Execute the enemy AI, thne add the result to the log.
             elif len(self.moveBoxes) == 0: # Otherwise, it must be the player's turn. If there aren't any move boxes open, open one.
                 self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,self.turnOrder[0].getOptions(),-1))
         # Now on to the actual display.
@@ -164,9 +165,11 @@ class BattleScene: # As the name suggests, the title screen.
                 rl.console_print(0, 2, i*6+1, self.party[i].getLine1()) # Draw first line of stats.
                 rl.console_print(0, 2, i*6+2, self.party[i].getLine2()) # Draw second line of stats.
                 rl.console_print(0, 2, i*6+3, self.party[i].getLine3()) # Draw third line of stats.
+                rl.console_print(0, 2, i*6+4, self.party[i].getStatusLine(18)) # Draw fourth line of stats.
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes.
             if not len(self.enemies) <= i and not self.enemies[i].getHP() <= 0: # Don't draw stats if enemy is not present or KO'd.
                 rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.
+                rl.console_print(0, 61, i*4+2, self.enemies[i].getStatusLine(17)) # Draw second line of stats.
         for i,box in enumerate(self.moveBoxes): # Draw all the move boxes, the current one being yellow. Since this can overlap the enemy stats, this must be drawn after that.
             if i+1 == len(self.moveBoxes):
                 box.draw(rl.yellow)
@@ -212,6 +215,8 @@ class BattleScene: # As the name suggests, the title screen.
             previousCommand = self.moveBoxes[len(self.moveBoxes)-2].forward()
             if previousCommand == "Heal I":
                 self.parseTurnResults(self.turnOrder[0].castHealI(target)) # Cast Heal I.
+            if previousCommand == "Sharpen":
+                self.parseTurnResults(self.turnOrder[0].castSharpen(target)) # Cast Heal I.
         if command == "Attack": # Opten a box to select attack type.
             previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
             self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getAttackOptions(),-1))
@@ -220,7 +225,7 @@ class BattleScene: # As the name suggests, the title screen.
             self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getSpellOptions(),-1))
         if command == "Basic" or command == "Bite" or command == "Fire I":
             self.openTargetSelect(self.enemies)
-        if command == "Heal I":
+        if command == "Heal I" or command == "Sharpen":
             self.openTargetSelect(self.party)
     
     def openTargetSelect(self, arrayToUse): # Opens the target selection window. This will be needed often enough to justify a separate function. If enemies is false, select from allies instead.

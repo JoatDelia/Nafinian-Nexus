@@ -2,11 +2,44 @@ import libtcodpy as rl
 
 import random
 
+import time
+
 class Actor:
     def __init__(self): # Initialize the character.
+        self.stre = 60    
         self.end = 60 # Endurance.
         self.healFull() # Set HP to the proper number.
         self.name = "CHARNAME" # The name to display.
+        self.statusEffects = [] # List of current status effects.
+        self.statusIsScrolling = False # Whether the status effects list is scrolling due to insufficient space.
+        self.startedScrolling = time.time() # If so, this is when it started.
+    
+    def receiveStatus(self,newEffect): # Add a new status effect to a character. This should be an array in the form of [string effect name, boolean beneficial, integer duration, integer potency (if N/A, put 0)]
+        # The valid status effects so far are:
+        # Sharpen
+        self.statusEffects.append(newEffect)
+    
+    def decrementStatusEffects(self): # Remove 1 from the duration of all status effects.
+        i = 0 # Tracks position in the status effect list.
+        while i < len(self.statusEffects): # Go through the list entry by entry.
+            self.statusEffects[i][2] -= 1 # Decrement duration by 1.
+            if self.statusEffects[i][2] <= 0: # If a status effect has run out, remove it.
+                self.statusEffects.pop(i)
+            else: # If nothing was removed, increment. If we incremented regardless, that would cause items to be skipped. This is also why a for-in loop is not used.
+                i += 1
+    
+    def getStr(self): # Get strength.
+        returnStat = self.stre
+        for effect in self.statusEffects:
+            if effect[0] == "Sharpen":
+                returnStat += effect[3]
+        return returnStat
+    
+    def setStr(self,x): # Set strength.
+        self.stre = min(x,1000) # Set the stat, but enforce the maximum.
+    
+    def getEnd(self): # Get endurance.
+        return self.end
     
     def setEnd(self,x): # Set endurance.
         oldMaxHP = self.getMaxHP() # Store the old max HP.
@@ -27,10 +60,10 @@ class Actor:
         self.mp = self.getMaxMP() # Fully restore MP.
         
     def getMaxHP(self): # Calculate and return max HP.
-        return max(int(self.end/5) + self.getMod(self.end),1)
+        return max(int(self.getEnd()/5) + self.getMod(self.getEnd()),1)
         
     def getMaxAP(self): # Calculate and return max AP.
-        return max(15 + self.getMod(self.end),1)
+        return max(15 + self.getMod(self.getEnd()),1)
         
     def getMaxMP(self): # Calculate and return max MP.
         return 12 # Until WIL is introduced, just a flat 12.
@@ -61,6 +94,8 @@ class Actor:
             moves.append("Heal I")
         if self.name == "Benjamin" and self.mp >= 3: # Again, this won't be hard-coded by name in the final game, of course.
             moves.append("Fire I")
+        if self.name == "Alzoru" and self.mp >= 4: # As before.
+            moves.append("Sharpen")
         return moves
     
     def isAI(self): # Whether the character is controlled by the AI.
@@ -118,7 +153,7 @@ class Actor:
         if dodgeRoll > hitRoll: # Handle misses.
             message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
-        damageAmt = max(random.randint(9,18)+self.getAttackMod()-target.getDefenseMod(),0)
+        damageAmt = max(random.randint(9,18)+self.getMod(self.getStr())-target.getDefenseMod(),0) # This isn't a weapon attack, so does not include weapon mod. Instead, just simply use Strength.
         if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
             damageAmt *= 2
             message = "{0} critically bites {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
@@ -160,6 +195,13 @@ class Actor:
             message += " Fatal blow..."
         return {'log': message, 'target': target} # Return the message to send to the combat log.
     
+    def castSharpen(self,target): # Cast Sharpen on the specified ally.
+        self.mp -= 4 # Remove MP for Heal I. This is a flat 3 for now, since Heal I is a cross-class spell for Gina, but later there would be a check for circumstances like that.
+        buffAmount = 5 + random.randint(1,6)
+        message = "{0} casts Sharpen on {1}, increasing STR by {2}.".format(self.getColoredName(),target.getColoredName(),buffAmount)
+        target.receiveStatus(["Sharpen",True,5,buffAmount])
+        return {'log': message} # Return the message to send to the combat log.
+    
     def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
         return self.attack(random.choice(party))
     
@@ -167,15 +209,15 @@ class Actor:
         return self.hp
         
     def getAttackMod(self): # Later, this will prperly calculate from the party's equipment. Equipment doesn't exist yet, so it's being simulated in this case.
-        if self.name == "Benjamin": # Simulating Quartz Orb
-            return 3
+        if self.name == "Benjamin": # Simulating Wooden Training Sword
+            return 3 + self.getMod(self.getStr())
         if self.name == "Gina": # Simulating Quartz Orb
             return 3
         if self.name == "Alzoru": # Simulating Shell Ocarina
             return 2
         if self.name == "Dismas": # Simulating Worn Knife
             return 4
-        return 0 # For anyone else, don't simulate equipment.
+        return self.getMod(self.getStr()) # For anyone else, don't simulate equipment.
     
     def getDefenseMod(self): # Same applies here as to getAttackMod.
         if self.name == "Benjamin": # Simulating Circular Wood Shield
@@ -206,16 +248,34 @@ class Actor:
         message = None # Message to display in the log.
         if self.isDead(): # The dead don't regenerate (zombies and stuff aside - you know what I meant).
             return
-        if self.getMod(self.end) >= 0: # Regenerate health, unless Endurance mod is negative.
+        if self.getMod(self.getEnd()) >= 0: # Regenerate health, unless Endurance mod is negative.
             wasUnconscious = self.hp <= 0 # Whether the actor was previously unconscious.
-            self.hp = min(self.hp + 1 + int(self.getMod(self.end)/5),self.getMaxHP()) # Apply HP regeneration.
+            self.hp = min(self.hp + 1 + int(self.getMod(self.getEnd())/5),self.getMaxHP()) # Apply HP regeneration.
             if self.hp > 0 and wasUnconscious:
                 message = self.getColoredName()+" gets back up!"
-        if self.getMod(self.end) >= 0 and self.hp > 0: # Regenerate stamina, unless Endurance mod is negative or character is unconscious.
-            self.ap = min(self.ap + 1 + int(self.getMod(self.end)/10),self.getMaxAP()) # Apply AP regeneration.
-        if self.getMod(self.end) >= 0 and self.hp > 0: # Regenerate mana.
+        if self.getMod(self.getEnd()) >= 0 and self.hp > 0: # Regenerate stamina, unless Endurance mod is negative or character is unconscious.
+            self.ap = min(self.ap + 1 + int(self.getMod(self.getEnd())/10),self.getMaxAP()) # Apply AP regeneration.
+        if self.getMod(60) >= 0 and self.hp > 0: # Regenerate mana.
             self.mp = min(self.mp + 1, self.getMaxMP()) # Apply MP regeneration.
         return message
+    
+    def getStatusLine(self,width): # Return list of status effects. Later, I'll need to account for if the line overflows.
+        statusLine = ""
+        for i,effect in enumerate(self.statusEffects): # Add each effect to the line, separated by commas.
+            if i == 0:
+                statusLine = effect[0]
+            else:
+                statusLine += ", "+effect[0]
+        if len(statusLine) > width and not self.statusIsScrolling: # If the status line won't all fit and isn't already scrolling, start it scrolling.
+            self.statusIsScrolling = True
+            self.startedScrolling = time.time()
+        elif len(statusLine) <= width and self.statusIsScrolling: # Inversely, if it will all fit and the status is scrolling, stop it.
+            self.statusIsScrolling = False
+        if self.statusIsScrolling:
+            loopedStatusLine = statusLine + ", " + statusLine # A looped version of the status line.
+            startingPoint = int((time.time() - self.startedScrolling) * 5) % (len(statusLine) + 2) # Where to start sampling from the looped line.
+            return loopedStatusLine[startingPoint:startingPoint + width] # Take a sample from the looped line, making it look like it's scrolling over time.
+        return statusLine
 
 class Chara(Actor):
     def getColoredName(self):
@@ -238,6 +298,7 @@ class Chara(Actor):
         
     def getLine3(self): # Return stamina bar and AP.
         return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}MP".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.mp,self.getMaxMP(),8),chr(rl.COLCTRL_STOP),self.mp,self.getMaxMP())
+        
 
 class Enemy(Actor):
     def getColoredName(self):
@@ -250,13 +311,19 @@ class Enemy(Actor):
         # Heart!
         return returnLine # By your powers combined, I am CAPTAIN STATUS!
     
-    def aiAct(self,party): # What the AI does with the character's turn. For now, just attack a random party member.
+    def aiAct(self,party,enemies): # What the AI does with the character's turn. For now, just attack a random party member.
         partyMembersUp = []
+        enemiesUp = []
         for member in party:
             if member.getHP() > 0:
                 partyMembersUp.append(member)
-        moveNum = random.randint(0,2) # Decide randomly what to do.
-        if moveNum == 2 and self.ap >= 3: # If chosen and able to use, do Fire I.
+        for member in enemies:
+            if member.getHP() > 0:
+                enemiesUp.append(member)
+        moveNum = random.randint(0,4) # Decide randomly what to do.
+        if moveNum == 3 and self.mp >= 4: # If chosen and able to use, do Sharpen.
+            return self.castSharpen(random.choice(enemiesUp))
+        if moveNum == 2 and self.mp >= 3: # If chosen and able to use, do Fire I.
             return self.castFireI(random.choice(partyMembersUp))
         elif moveNum == 1 and self.ap >= 3: # If chosen and able to use, do a bite.
             return self.bite(random.choice(partyMembersUp))
