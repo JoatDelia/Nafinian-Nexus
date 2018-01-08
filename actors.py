@@ -6,8 +6,14 @@ import time
 
 class Actor:
     def __init__(self): # Initialize the character.
-        self.stre = 60    
+        self.stre = 60 # Strength.
         self.end = 60 # Endurance.
+        self.dex = 60 # Dexterity.
+        self.per = 60 # Perception.
+        self.wil = 60 # Willpower.
+        self.inte = 60 # Intelligence.
+        self.cha = 60 # Charisma.
+        self.luk = 60 # Luck.
         self.healFull() # Set HP to the proper number.
         self.name = "CHARNAME" # The name to display.
         self.statusEffects = [] # List of current status effects.
@@ -46,7 +52,47 @@ class Actor:
         oldMaxAP = self.getMaxAP() # Store the old max AP.
         self.end = min(x,1000) # Set the stat, but enforce the maximum.
         self.hp = max(self.hp + self.getMaxHP() - oldMaxHP, 1) # Adjust HP accordingly.
-        self.ap = max(self.ap + self.getMaxAP() - oldMaxAP, 1) # Adjust AP accordingly.
+        self.ap = max(self.ap + self.getMaxAP() - oldMaxAP, 0) # Adjust AP accordingly.
+        
+    def getDex(self): # Get dexterity.
+        return self.dex
+    
+    def setDex(self,x): # Set dexterity.
+        self.dex = min(x,1000) # Set the stat, but enforce the maximum.
+    
+    def getPer(self): # Get perception.
+        return self.per
+    
+    def setPer(self,x): # Set perception.
+        self.per = min(x,1000) # Set the stat, but enforce the maximum.
+    
+    def getWil(self): # Get willpower.
+        return self.wil
+    
+    def setWil(self,x): # Set endurance.
+        oldMaxMP = self.getMaxMP() # Store the old max MP.
+        oldMaxAP = self.getMaxAP() # Store the old max AP.
+        self.wil = min(x,1000) # Set the stat, but enforce the maximum.
+        self.mp = max(self.mp + self.getMaxMP() - oldMaxMP, 0) # Adjust MP accordingly.
+        self.ap = max(self.ap + self.getMaxAP() - oldMaxAP, 0) # Adjust AP accordingly.
+        
+    def getInt(self): # Get intelligence.
+        return self.inte
+    
+    def setInt(self,x): # Set intelligence.
+        self.inte = min(x,1000) # Set the stat, but enforce the maximum.
+    
+    def getCha(self): # Get charisma.
+        return self.cha
+    
+    def setCha(self,x): # Set strength.
+        self.cha = min(x,1000) # Set the stat, but enforce the maximum.
+    
+    def getLuk(self): # Get luck.
+        return self.luk
+    
+    def setLuk(self,x): # Set luck.
+        self.luk = min(x,1000) # Set the stat, but enforce the maximum.
     
     def setName(self,x): # Set character's name.
         self.name = x
@@ -63,10 +109,10 @@ class Actor:
         return max(int(self.getEnd()/5) + self.getMod(self.getEnd()),1)
         
     def getMaxAP(self): # Calculate and return max AP.
-        return max(15 + self.getMod(self.getEnd()),1)
+        return max(15 + self.getMod(self.getEnd()) + self.getMod(self.getWil()),1)
         
     def getMaxMP(self): # Calculate and return max MP.
-        return 12 # Until WIL is introduced, just a flat 12.
+        return max(int(self.getWil()/5) + self.getMod(self.getWil()),1)
     
     def getMod(self,x): # Get the modifier for the specified stat.
         if x <= 5:
@@ -127,12 +173,14 @@ class Actor:
     
     def attack(self,target): # Attack the specified foe.
         message = "" # The message to send back to the log.
-        hitRoll = random.randint(1,20) # These "rolls" correspond to their tabletop equivalent.
-        dodgeRoll = random.randint(1,20)
+        hitRoll = random.randint(1,20) + self.getMod(self.getPer()) + int(self.getMod(self.getLuk()) / 2 + 0.5) # These "rolls" correspond to their tabletop equivalent.
+        dodgeRoll = random.randint(1,20) + target.getMod(target.getDex()) + int(target.getMod(self.getLuk()) / 2 + 0.5)
         if dodgeRoll > hitRoll: # Handle misses.
             message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
-        damageAmt = max(random.randint(1,6)+random.randint(1,6)+self.getAttackMod()-target.getDefenseMod(),0)
+        damageAmt = max(random.randint(1,6)+random.randint(1,6)+self.getAttackMod()-target.getDefenseMod() + int(self.getMod(self.getLuk()) / 4 + 0.5),0)
+        if dodgeRoll == hitRoll:
+            damageAmt = int(damageAmt / 2 + 0.5)
         if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
             damageAmt *= 2
             message = "{0} critically hits {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
@@ -148,12 +196,14 @@ class Actor:
     def bite(self,target): # Bite the specified foe.
         self.ap -= 3 # Remove AP for bite. No need to check here - if the character has insufficient AP, Bite shouldn't appear in the first place.
         message = "" # The message to send back to the log.
-        hitRoll = random.randint(1,20) # These "rolls" correspond to their tabletop equivalent.
-        dodgeRoll = random.randint(1,20)
+        hitRoll = random.randint(1,20) + self.getMod(self.getPer()) + int(self.getMod(self.getLuk()) / 2 + 0.5) # These "rolls" correspond to their tabletop equivalent.
+        dodgeRoll = random.randint(1,20) + target.getMod(target.getDex()) + int(target.getMod(self.getLuk()) / 2 + 0.5)
         if dodgeRoll > hitRoll: # Handle misses.
             message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
         damageAmt = max(random.randint(9,18)+self.getMod(self.getStr())-target.getDefenseMod(),0) # This isn't a weapon attack, so does not include weapon mod. Instead, just simply use Strength.
+        if dodgeRoll == hitRoll:
+            damageAmt = int(damageAmt / 2 + 0.5)
         if random.randint(1,12) == 12: # Handle critical hits. This is a flat chance.
             damageAmt *= 2
             message = "{0} critically bites {1} for {2} damage!".format(self.getColoredName(),target.getColoredName(),damageAmt)
@@ -170,7 +220,7 @@ class Actor:
         if target.hp == target.getMaxHP():
             return {'log': target.getColoredName()+" is already at full health!", 'cancel': None}
         self.mp -= 3 # Remove MP for Heal I. This is a flat 3 for now, since Heal I is a cross-class spell for Gina, but later there would be a check for circumstances like that.
-        healAmt = random.randint(1,4)
+        healAmt = random.randint(1,4) + self.getMod(self.getWil())
         message = "{0} casts Heal I on {1}, restoring {2}HP.".format(self.getColoredName(),target.getColoredName(),healAmt)
         wasUnconscious = target.hp <= 0 # Whether the actor was previously unconscious.
         target.heal(healAmt)
@@ -181,12 +231,12 @@ class Actor:
     def castFireI(self,target): # Cast Fire I the specified foe.
         self.mp -= 3 # Remove MP for Fire I.
         message = "" # The message to send back to the log.
-        hitRoll = random.randint(1,20) # These "rolls" correspond to their tabletop equivalent.
-        dodgeRoll = random.randint(1,20)
+        hitRoll = random.randint(1,20) + self.getMod(self.getDex()) # These "rolls" correspond to their tabletop equivalent.
+        dodgeRoll = random.randint(1,20) + target.getMod(target.getDex())
         if dodgeRoll > hitRoll: # Handle misses.
             message = "{0} casts Fire I, but misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
-        damageAmt = max(random.randint(1,6)-target.getSpecialDefenseMod(),0)
+        damageAmt = max(random.randint(1,6) + self.getMod(self.getInt()) - target.getSpecialDefenseMod(),0)
         message = "{0} casts Fire I on {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
         target.damage(damageAmt)
         if target.getHP() <= 0:
@@ -197,7 +247,7 @@ class Actor:
     
     def castSharpen(self,target): # Cast Sharpen on the specified ally.
         self.mp -= 4 # Remove MP for Heal I. This is a flat 3 for now, since Heal I is a cross-class spell for Gina, but later there would be a check for circumstances like that.
-        buffAmount = 5 + random.randint(1,6)
+        buffAmount = 5 + random.randint(1,6) + self.getMod(self.getInt())
         message = "{0} casts Sharpen on {1}, increasing STR by {2}.".format(self.getColoredName(),target.getColoredName(),buffAmount)
         target.receiveStatus(["Sharpen",True,5,buffAmount])
         return {'log': message} # Return the message to send to the combat log.
@@ -212,34 +262,34 @@ class Actor:
         if self.name == "Benjamin": # Simulating Wooden Training Sword
             return 3 + self.getMod(self.getStr())
         if self.name == "Gina": # Simulating Quartz Orb
-            return 3
+            return 3 + self.getMod(self.getWil())
         if self.name == "Alzoru": # Simulating Shell Ocarina
-            return 2
+            return 2 + self.getMod(self.getCha())
         if self.name == "Dismas": # Simulating Worn Knife
-            return 4
+            return 4 + self.getMod(self.getDex())
         return self.getMod(self.getStr()) # For anyone else, don't simulate equipment.
     
     def getDefenseMod(self): # Same applies here as to getAttackMod.
         if self.name == "Benjamin": # Simulating Circular Wood Shield
-            return 2 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
         if self.name == "Gina": # Simulating Circular Wood Shield
-            return 2 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
         if self.name == "Alzoru": # Simulating Anikto leather tunic, Anikto leather waistcoat
-            return 5 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
+            return 5 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
         if self.name == "Dismas": # Simulating Leather Waistcoat
-            return 2 + self.getMod(self.end) + random.randint(1,6) + random.randint(1,6)
-        return self.getMod(self.end) + random.randint(1,6) + random.randint(1,6) # For anyone else, don't simulate equipment.
+            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
+        return self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5) # For anyone else, don't simulate equipment.
     
     def getSpecialDefenseMod(self): # Same as getDefenseMod, but using Willpower.
         if self.name == "Benjamin": # Simulating Circular Wood Shield
-            return 2 + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
         if self.name == "Gina": # Simulating Circular Wood Shield
-            return 2 + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
         if self.name == "Alzoru": # Simulating Anikto leather tunic, Anikto leather waistcoat
-            return 5 + random.randint(1,6) + random.randint(1,6)
+            return 5 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
         if self.name == "Dismas": # Simulating Leather Waistcoat
-            return 2 + random.randint(1,6) + random.randint(1,6)
-        return random.randint(1,6) + random.randint(1,6) # For anyone else, don't simulate equipment.
+            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
+        return self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) # For anyone else, don't simulate equipment.
     
     def isDead(self):
         return self.hp <= 0
