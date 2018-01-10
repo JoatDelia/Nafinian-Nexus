@@ -271,25 +271,25 @@ class Actor:
     
     def getDefenseMod(self): # Same applies here as to getAttackMod.
         if self.name == "Benjamin": # Simulating Circular Wood Shield
-            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         if self.name == "Gina": # Simulating Circular Wood Shield
-            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         if self.name == "Alzoru": # Simulating Anikto leather tunic, Anikto leather waistcoat
-            return 5 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
+            return 5 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         if self.name == "Dismas": # Simulating Leather Waistcoat
-            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         return self.getMod(self.getEnd()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5) # For anyone else, don't simulate equipment.
     
     def getSpecialDefenseMod(self): # Same as getDefenseMod, but using Willpower.
         if self.name == "Benjamin": # Simulating Circular Wood Shield
-            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         if self.name == "Gina": # Simulating Circular Wood Shield
-            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
+            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         if self.name == "Alzoru": # Simulating Anikto leather tunic, Anikto leather waistcoat
-            return 5 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
+            return 5 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
         if self.name == "Dismas": # Simulating Leather Waistcoat
-            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6)
-        return self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) # For anyone else, don't simulate equipment.
+            return 2 + self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5)
+        return self.getMod(self.getWil()) + random.randint(1,6) + random.randint(1,6) + int(self.getMod(self.getLuk()) / 4 + 0.5) # For anyone else, don't simulate equipment.
     
     def isDead(self):
         return self.hp <= 0
