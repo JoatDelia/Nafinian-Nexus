@@ -1,0 +1,151 @@
+==========Nafinian Nexus Modding Menu Notes==========
+
+When first one enters the Modding Menu, they are asked if they wish to make a new mod, open an existing one, or duplicate and open an existing one.
+
+[[[Basic Details]]]
+Label               Type            Function
+"Name:"             Text Field      Name of the mod
+"Credits..."        Button          Leads to Credits submenu
+"This is an:"       Radio Buttons   If "Adventure", this is a stand-alone mod. If "Add-On", this is meant to modify existing adventures.
+"Modifiable by:"    Radio Buttons   Can be "Anything", "Add-ons meant for this adventure", "Nothing". Only appears if this is an adventure.
+"Can modify:"       Text Field      Help text will note that leaving this empty means it can modify any adventure that allows itself to be modified by any add-ons. This only appears if this is an add-on.
+"Requires..."       Button          Leads to the Requires submenu
+"Title Image:"      File Select     As the name implies.
+
+There will be a static text message as well, reading: "Remember to back up your work often!"
+
+
+__Credits Submenu__
+At the top will be two labels: "Position" and "Names".
+
+Under "Position" will be a single text field. Under "Names" will be a text field which will expand if Enter is pressed, to allow putting in more than one name (escape must be pressed to finish inputting, a fact which the help box should notify the user of). 
+
+Under that will be an "Add" button, which will add another row of text fields. The help text will notify the user that any rows with a field left blank will be removed from the credits upon exiting the menu.
+
+
+__Requires Submenu__
+This will include a single massive multiline text field. A label at the top will instruct the user to type the name of a required add-on on each line. It will also say that if this add-on requires a specific ADVENTURE, then that belongs in the "Can Modify" field, not here.
+
+
+
+
+
+
+
+
+
+[[[Classes]]]
+
+
+
+
+
+
+
+
+
+[[[World Map]]]
+This menu first opens up into a map selection screen, with an "Add New Map", which will give the option to either create a static map or a dynamic map. Static maps are made in advance, while dynamic maps are generated differently each playthrough. For dynamic maps, see the steps system example at the bottom of the document.
+
+
+__Static Map__
+Label               Type        Function
+"Name:"             Text Field  Name of the map
+"Size ????x????"    Label       Right next to...
+"Resize"            Button      Opens a separate window to input the new dimensions, each of which can be up to four digits long. If the size is reduced, the user must further specify in what way it should be reduced (in other words, which sides tiles should be removed from).
+"Edit Map"          Button      In bottom left. Goes to the map editing screen.
+"Edit Events"       Button      In bottom right. Goes to event editing screen.
+
+
+__Map Editing Screen__
+Controls:
+Enter: Draw with selected tile.
+Shift+Enter: Fill area with selected tile.
+Escape: Exit
+Tab: Enter tile selection
+Shift+Tab: Switch to event editing.
+Numpad 1-9: Move the cursor
+1-9: Select a tile from quick-select.
+0: Select the tile you are hovering over.
+Space: Choose a screen for the tile you are hovering over.
+
+Top:
++- Selected -------------------+- Quick Select ----+---------------------------+
+| . | Grass                    | . ~ ^ # > < * & , | Press F1 to view controls |
++---+--------------------------+ 1 2 3 4 5 6 7 8 9 +---------------------------+
+
+At the bottom is a box showing info on the tile being hovered over.
+
+Between them is the map screen itself on the left side, and a preview of the screen associated with that map tile on the right (or text saying that the screen will be auto-generated, if no scene is specified).
+
+
+__Event Editing Screen__
+Controls:
+Enter: Choose event
+Delete: Delete event
+C: Copy event
+V: Paste event
+X: Cut event
+Shift+Tab: Switch to map editing.
+
+
+
+
+
+
+
+
+
+A simplistic example:
+
+[[[Step 0]]]
+Base tile: Ocean
+
+[[[Step 1: Create Continents]]]
+Action Type: Create Globs (Create masses of adjcent tiles)
+Convert Tiles: Ocean > Grass
+Also convert tiles within: 4
+Size: Range between 100 and 200
+Do multiple times: Range between 5 and 15
+
+[[[Step 2: Create Mountains]]]
+Action Type: Create Crooked Line
+Convert Tiles: Grass > Mountain
+Also convert tiles within: Range 1 to 2
+Start point must be: On Grass, within 1 tile of water
+End point must be: On Grass, within 1 tile of water or within one tile of mountain
+Points between must be: On Grass
+Minimum distance between points: 20
+Do multiple times: Range between 2 and 10
+
+[[[Step 3: Create Beaches]]]
+Action Type: Create Globs
+Convert Tiles: Grass > Sand
+Also convert tiles within: Range between 2 and 4
+Must remain on tiles that are: Within 1 space of Ocean
+Size: Range between 5 and 30
+Do multiple times: Range between 20 and 50
+
+[[[Step 4: Create Forests]]]
+Action Type: Create Globs
+Convert Tiles: Grass > Forest
+Also convert tiles within: 2
+Must remain on tiles that are: Grass
+Size: Range between 15 and 50
+Do multiple times: Range between 20 and 30
+
+[[[Step 5: Create Lakes]]]
+Action Type: Create Globs
+Convert Tiles: Grass > Water, Forest > Water
+Also convert tiles within: 1
+Must remain on tiles that are: Not within 1 tile of ocean.
+Size: Between 5 and 15
+Do multiple times: Between 15 and 25
+
+[[[Step 6: Create Rivers]]]
+Action Type: Create Crooked Line
+Convert Tiles: Grass > Water, Forest > Water
+Start point must be: Adjacent to ocean
+End point must be: Adjacent to ocean or adjacent to water
+Minimum distance between points: 10
+Do multiple times: Between 15 and 20

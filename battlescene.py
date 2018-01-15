@@ -217,7 +217,7 @@ class BattleScene: # As the name suggests, the title screen.
                 self.parseTurnResults(self.turnOrder[0].castHealI(target)) # Cast Heal I.
             if previousCommand == "Sharpen":
                 self.parseTurnResults(self.turnOrder[0].castSharpen(target)) # Cast Heal I.
-        if command == "Attack": # Opten a box to select attack type.
+        if command == "Attack": # Open a box to select attack type.
             previousBox = self.moveBoxes[len(self.moveBoxes)-1] # The box that was active before this one.
             self.moveBoxes.append(bx.SelectBox(previousBox.getX()+previousBox.getWidth(),3,-1,-1,None,self.turnOrder[0].getAttackOptions(),-1))
         if command == "Magic": # Open a box to select magic type.
