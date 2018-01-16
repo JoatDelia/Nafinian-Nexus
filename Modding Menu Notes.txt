@@ -6,25 +6,103 @@ When first one enters the Modding Menu, they are asked if they wish to make a ne
 Label               Type            Function
 "Name:"             Text Field      Name of the mod
 "Credits..."        Button          Leads to Credits submenu
-"This is an:"       Radio Buttons   If "Adventure", this is a stand-alone mod. If "Add-On", this is meant to modify existing adventures.
-"Modifiable by:"    Radio Buttons   Can be "Anything", "Add-ons meant for this adventure", "Nothing". Only appears if this is an adventure.
+"This is an:"       Multiple Choice If "Adventure", this is a stand-alone mod. If "Add-On", this is meant to modify existing adventures.
+"Modifiable by:"    Multiple Choice Can be "Anything", "Add-ons meant for this adventure", "Nothing". Only appears if this is an adventure.
 "Can modify:"       Text Field      Help text will note that leaving this empty means it can modify any adventure that allows itself to be modified by any add-ons. This only appears if this is an add-on.
 "Requires..."       Button          Leads to the Requires submenu
 "Title Image:"      File Select     As the name implies.
+"Title Music:"      File Select     As the name implies.
 
 There will be a static text message as well, reading: "Remember to back up your work often!"
 
 
++- Basic Details --------------------------------------------------------------+
+|          Name | Galactic Nexus                                               |
+|   Title Image | gnexus.png                                                   |
+|   Title Music | galactic_nexus.ogg                                           |
+|    This is an | Adventure                                                    |
+| Modifiable By | Anything                                                     |
+|   Requires... |                                                              |
+|    Credits... |                                                              |
++---------------+--------------------------------------------------------------+
+
+
 __Credits Submenu__
-At the top will be two labels: "Position" and "Names".
-
-Under "Position" will be a single text field. Under "Names" will be a text field which will expand if Enter is pressed, to allow putting in more than one name (escape must be pressed to finish inputting, a fact which the help box should notify the user of). 
-
-Under that will be an "Add" button, which will add another row of text fields. The help text will notify the user that any rows with a field left blank will be removed from the credits upon exiting the menu.
-
++- Credits ---------------------------+----------------------------------------+
+|                     Lead Programmer | Joat                                  #|
+|              Original Tabletop Game | Alzoru                                #|
+|                      Mod Developers | Joat                                  #|
+|                                     | Alzoru                                #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
+|                                     |                                       #|
++-------------------------------------+----------------------------------------+
+| Type the position on the left and the people on the right.                   |
+| Press ctrl+up or ctrl+down to shift an entry, press Enter to add a new line. |
++------------------------------------------------------------------------------+
 
 __Requires Submenu__
-This will include a single massive multiline text field. A label at the top will instruct the user to type the name of a required add-on on each line. It will also say that if this add-on requires a specific ADVENTURE, then that belongs in the "Can Modify" field, not here.
+This will include a single massive multiline text field. A label at the top will instruct the user to type the name of a required add-on on each line. Adventures can be added here as well, if someone wants to use races, classes, or the like from a given adventure.
+
+
+
+
+
+
+
+
+
+[[[Animations]]]
++- Animations ------------+-------------------------+--------------------------+
+| Fire I                  | Heal I                  | Ice I                   #|
+| Zap I                   | Pow                     | Slash                   #|
+| Stab                    |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
++-----------------------+-+-------------------------+-+------------------------+
+                        |  New Animation (ctrl+enter) |
+                        +-----------------------------+
+
++- Animation -------------------+- Frame Properties ---------------------------+
+| Name: Slash                   |           Duration | 20ms                    |
++--------+----------------------+              Sound | slash.ogg               |
+| Frames | 1 2 3 4              | Edit Appearance... |                         |
++--------+######################+--------------------+-------------------------+
+         +----------------------+           +------------++- Appearance -------+
+                                            | Current: / ||           /        |
+                                            +------------+|          /         |
+                                                          |         /          |
+                           Press Tab to change character. |        /           |
+                                 Press C to change color. +--------------------+
+
+NOTE: The "Current" box and instructions only show if the user is in "Edit Appearance" mode.
 
 
 
@@ -35,6 +113,62 @@ This will include a single massive multiline text field. A label at the top will
 
 
 [[[Classes]]]
+Note: The default class is "None", with no stat modifiers, no class spells, no class feats, and the description (though such will likely never be seen) of: "Nice person though they may be, this character lacks class."
+
+Label                       Type            Function
+"Name:"                     Text Field      Name of the class.
+"STR:" etc.                 Number Field    How the given stats are modified by taking the class.
+"Description:"              Text Field      The description given when the class is highlighted.
+"Class Spells:"             Button          Goes to a sub-menu listing all spells, with a checkbox next to each.
+"Class Feats:"              Button          Goes to a sub-menu listing all feats, with a checkbox next to each. The exception is any feat listed as "available to all classes".
+"Starts with a spell:"      Check Box       If true, the character gets to select one spell from their class list to start with.
+"Gains psionic powers:"     Check Box       If true, the class gains psionic powers.
+"Starting at:"              Number Field    Level to gain the first psionic power. Only shows if the above is true.
+"Every X levels:"           Number Field    After the first psionic power, how many levels need to be gained to gain further powers. Only shows if "Gains psionic powers" is true.
+
+
+
+
+
+
+
+
+
+[[[Equipment]]]
+Label           Type                Function
+"Name:"         Text Field          Name of the equipment.
+"Type:"         Multiple Choice     Can be any of the different equipent types.
+"STR:" etc.     Number Field        How the given stats are modified by the equipment.
+"Animation:"    Select Box          Select which animation to play when attacking with this weapon.
+"Description:"  Text Field          The description given when the equipment is highlighted.
+"Enchantment:"  Select Box          Selects from existing enchantments something that this weapon will have by default. May select up to two.
+
+
+
+
+
+
+
+
+
+[[[Events]]]
+The first menu is a selection screen, including a "New Event..." option, which opens up the event creation dialogue:
+
+Label           Type        Function
+"Name:"         Text Field  Name of the event.
+"Edit Event"    Button      Goes the the event editing screen, which is enough to pretty much warrant a document all to itself.
+
+
+
+
+
+
+
+
+
+
+[[[Variables]]]
+This leads to a list of variables
 
 
 

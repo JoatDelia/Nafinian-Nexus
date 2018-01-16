@@ -337,17 +337,26 @@ class Chara(Actor):
     def isDead(self): # Return whether the party member is dead. Meanwhile, enemies don't have a distinction between "dead" and "unconscious", so their isDead() always returns false.
         return self.hp <= -max(self.getMaxHP(),10)
         
-    def getLine1(self): # Return health bar and HP.
+    def getHPLine(self): # Return HP text.
+        return "{0:>3}/{1:>3}HP".format(self.hp,self.getMaxHP())
+        
+    def getAPLine(self): # Return AP text.
+        return "{0:>3}/{1:>3}HP".format(self.ap,self.getMaxAP())
+        
+    def getMPLine(self): # Return MP text.
+        return "{0:>3}/{1:>3}HP".format(self.mp,self.getMaxMP())
+    
+    def getHPBar(self): # Returns health bar.
         if self.hp > 0:
-            return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
+            return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),8),chr(rl.COLCTRL_STOP))
         else:
-            return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}HP".format(chr(rl.COLCTRL_FORE_RGB),chr(128),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(32),chr(32),chr(32),self.makeBar(max(self.getMaxHP(),10)+self.hp,max(self.getMaxHP(),10),8),chr(rl.COLCTRL_STOP),self.hp,self.getMaxHP())
+            return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(128),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(32),chr(32),chr(32),self.makeBar(max(self.getMaxHP(),10)+self.hp,max(self.getMaxHP(),10),8),chr(rl.COLCTRL_STOP))
         
-    def getLine2(self): # Return stamina bar and AP.
-        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}AP".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),8),chr(rl.COLCTRL_STOP),self.ap,self.getMaxAP())
+    def getAPBar(self): # Return stamina bar.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),8),chr(rl.COLCTRL_STOP))
         
-    def getLine3(self): # Return stamina bar and AP.
-        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9} {10:>3}/{11:>3}MP".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.mp,self.getMaxMP(),8),chr(rl.COLCTRL_STOP),self.mp,self.getMaxMP())
+    def getMPBar(self): # Return mana bar.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.mp,self.getMaxMP(),8),chr(rl.COLCTRL_STOP))
         
 
 class Enemy(Actor):
@@ -378,3 +387,12 @@ class Enemy(Actor):
         elif moveNum == 1 and self.ap >= 3: # If chosen and able to use, do a bite.
             return self.bite(random.choice(partyMembersUp))
         return self.attack(random.choice(partyMembersUp)) # If nothing else, just randomly attack.
+    
+    def getHPBar(self): # Returns health bar.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(1),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(1),chr(1),self.makeBar(self.hp,self.getMaxHP(),5),chr(rl.COLCTRL_STOP))
+        
+    def getAPBar(self): # Return stamina bar.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(255),chr(255),chr(1),chr(rl.COLCTRL_BACK_RGB),chr(128),chr(128),chr(1),self.makeBar(self.ap,self.getMaxAP(),5),chr(rl.COLCTRL_STOP))
+        
+    def getMPBar(self): # Return mana bar.
+        return "{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}".format(chr(rl.COLCTRL_FORE_RGB),chr(1),chr(128),chr(255),chr(rl.COLCTRL_BACK_RGB),chr(1),chr(64),chr(128),self.makeBar(self.mp,self.getMaxMP(),5),chr(rl.COLCTRL_STOP))

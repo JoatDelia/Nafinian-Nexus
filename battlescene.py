@@ -120,10 +120,15 @@ class BattleScene: # As the name suggests, the title screen.
             elif len(self.moveBoxes) == 0: # Otherwise, it must be the player's turn. If there aren't any move boxes open, open one.
                 self.moveBoxes.append(bx.SelectBox(22,3,-1,-1,None,self.turnOrder[0].getOptions(),-1))
         # Now on to the actual display.
-        rl.console_clear(0) # Fill the window the background color.
+        rl.console_clear(0) # Fill the window with the background color.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes. Only the boxes themselves for now.
             if len(self.party) <= i or self.party[i].isDead(): # Draw a gray box if party member is not present or dead.
                 box.draw(rl.darker_gray)
+            else: # Otherwise, draw normal stats, aside from the bars.
+                rl.console_print(0, 12, i*6+1, self.party[i].getHPLine()) # Draw HP.
+                rl.console_print(0, 12, i*6+2, self.party[i].getAPLine()) # Draw AP.
+                rl.console_print(0, 12, i*6+3, self.party[i].getMPLine()) # Draw MP.
+                rl.console_print(0, 2, i*6+4, self.party[i].getStatusLine(18)) # Draw status effects.
             if len(self.party) <= i or self.party[i].getHP() <= 0: # Draw a red box if party member is unconscious.
                 box.draw(rl.darker_red)
             elif self.animPhase == 2 and (self.animTarget == i or self.animTarget == ALL_ALLIES) and int((time.time() - self.animStarted) * 8) % 2 == 0: # If the current animPhase is 2, this is the current animation target, and the time since the animation started dictates the box should be dark red, make it dark red.
@@ -134,9 +139,10 @@ class BattleScene: # As the name suggests, the title screen.
             if len(self.enemies) <= i or self.enemies[i].getHP() <= 0: # Draw a gray box if enemy is not present or KO'd.
                 box.draw(rl.darker_gray)
             elif self.animPhase == 2 and (self.animTarget - 4 == i or self.animTarget == ALL_ENEMIES) and int((time.time() - self.animStarted) * 8) % 2 == 0: # If the current animPhase is 2, this is the current animation target, and the time since the animation started dictates the box should be dark red, make it dark red.
-                pass
+                rl.console_print(0, 61, i*4+2, self.enemies[i].getStatusLine(18)) # Draw status effects.
             else:
                 box.draw(rl.crimson) # Otherwise, draw the normal party box.
+                rl.console_print(0, 61, i*4+2, self.enemies[i].getStatusLine(18)) # Draw status effects.
         self.infoBox.draw(rl.white) # Draw the combat log box.
         self.turnBox.draw(rl.white) # Draw the X's Turn box.
         rl.console_print_ex(0, 31, 1, rl.BKGND_NONE, rl.CENTER, "{0}".format(self.turnOrder[0].getColoredName())) # Draw whose turn it is.
@@ -162,14 +168,14 @@ class BattleScene: # As the name suggests, the title screen.
         # However, only after that should the actual stats be drawn. This is so the life bar backgrounds can override the background image.
         for i,box in enumerate(self.partyBoxes): # Display the party boxes.
             if not len(self.party) <= i and not self.party[i].isDead(): # Don't draw stats if party member is not present or dead (should still show if merely KO'd.
-                rl.console_print(0, 2, i*6+1, self.party[i].getLine1()) # Draw first line of stats.
-                rl.console_print(0, 2, i*6+2, self.party[i].getLine2()) # Draw second line of stats.
-                rl.console_print(0, 2, i*6+3, self.party[i].getLine3()) # Draw third line of stats.
-                rl.console_print(0, 2, i*6+4, self.party[i].getStatusLine(18)) # Draw fourth line of stats.
+                rl.console_print(0, 2, i*6+1, self.party[i].getHPBar()) # Draw HP bar.
+                rl.console_print(0, 2, i*6+2, self.party[i].getAPBar()) # Draw AP bar.
+                rl.console_print(0, 2, i*6+3, self.party[i].getMPBar()) # Draw MP bar.
         for i,box in enumerate(self.enemyBoxes): # Display the enemy boxes.
             if not len(self.enemies) <= i and not self.enemies[i].getHP() <= 0: # Don't draw stats if enemy is not present or KO'd.
-                rl.console_print(0, 61, i*4+1, self.enemies[i].getLine1()) # Draw first line of stats.
-                rl.console_print(0, 61, i*4+2, self.enemies[i].getStatusLine(17)) # Draw second line of stats.
+                rl.console_print(0, 61, i*4+1, self.enemies[i].getHPBar()) # Draw HP bar.
+                rl.console_print(0, 67, i*4+1, self.enemies[i].getAPBar()) # Draw AP bar.
+                rl.console_print(0, 73, i*4+1, self.enemies[i].getMPBar()) # Draw MP bar.
         for i,box in enumerate(self.moveBoxes): # Draw all the move boxes, the current one being yellow. Since this can overlap the enemy stats, this must be drawn after that.
             if i+1 == len(self.moveBoxes):
                 box.draw(rl.yellow)
