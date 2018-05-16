@@ -11,14 +11,14 @@ class DevMenuScene: # As the name suggests, the title screen.
         self.box = bx.SelectBox(-1,-1,-1,-1,"Modding Menu",("Edit","Save","Load","Exit"),-1) #("Basic Details","Biomes","Classes","Dialogues","Enemies","Equipment","Feats","Items","Names","Races","Screens","Spells","Save","Load","Exit"),-1) # The main menu box.
         self.currentBox = self.box
         self.boxes = []
-        self.defaultMenuObj = ["Edit", "Menu", "", # The entire modding menu and its current values are stored in this array. Each entry in the menu has at least four items, the first four being the label, the type, and the help text, the current value. Some items have a fifth value, representing the max value for numbers, the character limit for text, or the file type extension accepted (in regex form, since multiple may be accepted). If the fourth entry is another list, then that list represents the new menu to go into.
+        self.defaultMenuObj = ["Edit", "Menu", "", # The entire modding menu and its current values are stored in this array. Each entry in the menu has at least four items, the first four being the label, the type, and the help text, the current value. Some items have a fifth value, representing the max value for numbers or the character limit for text. If the fourth entry is another list, then that list represents the new menu to go into.
             [
                 ["Input Test", "Menu", "Test various types of input. This will obviously be removed in the final game.",
                     [
                         ["Text Test", "Text", "Test text input.", "HPX!", 20],
                         ["Number Test", "Number", "Test numeric input.", 0, 100],
                         ["Yes/No Test", "Boolean", "Test yes/no input.", "Yes"],
-                        ["File Test", "File", "Test file input (image)", "", "bmp"]
+                        ["File Test", "Image", "Test file input (image)", ""]
                     ]
                 ]
             ]

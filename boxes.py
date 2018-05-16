@@ -4,6 +4,10 @@ import time
 
 import math
 
+import tkinter as tk
+
+from tkinter import filedialog
+
 class Box: # The class for completely non-interactive boxes, superclass for interactive boxes.
     def __init__(self,x,y,w,h,title=None,text=""):
         # Box dimensions.
@@ -261,6 +265,14 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
                 self.menuObj[self.selectedOption][3] = "No"
             else:
                 self.menuObj[self.selectedOption][3] = "Yes"
+        # Open file selection dialogue if needed for an image. A seperate entry will be made for audio files later, once I have chosen a method of playing audio, as that will influence what file types will be accepted there.
+        elif self.menuObj[self.selectedOption][1] == "Image":
+            root = tk.Tk() # Initialize tkinter for this purpose.
+            root.withdraw() # Without this, an empty box would be drawn before opening the file selection dialogue. Both annoying and unprofessional.
+            filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Bitmap File","*.bmp"),))
+            if filename.endswith(".bmp"):
+                self.menuObj[self.selectedOption][3] = filename # I know this produces an absolute path, which is undesirable. I have plans to make this a relative path in a later update.
+            # Sadly, I do not know of any way to return focus to the main window after this process is completed. Annoying, but hey, it's still more convenient then the user having to navigate a file select screen made by libtcod.
         # Otherwise, just set the input mode to the option type, but only if it's a valid type.
         elif self.menuObj[self.selectedOption][1] in ("Text","Number"):
             self.inputMode = self.menuObj[self.selectedOption][1]
