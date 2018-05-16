@@ -20,6 +20,26 @@ class DevMenuScene: # As the name suggests, the title screen.
                         ["Yes/No Test", "Boolean", "Test yes/no input.", "Yes"],
                         ["File Test", "Image", "Test file input (image)", ""]
                     ]
+                ],
+                ["Project Properties", "Menu", "Modify various overall aspects of the project itself.",
+                    [
+                        ["Name", "Text", "The name of this project.", "Project1", 50],
+                        ["Title Image", "Image", "The image to show on the title screen. Remember, part of this will be covered by the main menu.", ""],
+                        ["Default Game Parameters", "Menu", "Various misc. parameters that affect gameplay in various ways.", 
+                            [
+                                ["Override battle BGM", "Boolean", "Do not change the music when entering or exiting combat.", "No"],
+                                ["Disable random encounters", "Boolean", "With this on, random encounters do not occur. Battles triggered by events still work normally.", "No"],
+                                ["Permadeath", "Boolean", "With this on, dead characters are permanently removed from the party. If a character marked as vital, this results in a game over.", "No"],
+                                ["Reserve Party EXP %%", "Number", "The percentage of EXP gained by a character in the reserve party.", 0, 100],
+                                ["KO'd member EXP %%", "Number", "The percentage of EXP gained by a character who is unconscious at the battle's conclusion.", 100, 100],
+                                ["Dead member EXP %%", "Number", "The percentage of EXP gained by a character who is dead at the battle's conclusion. Dead characters won't level up until they are revived.", 0, 100],
+                                ["Can modify party anywhere", "Boolean", "If this is false, then the player must rely on an event that explicitly allows changing party members.", "No"],
+                                ["Can modify party in combat", "Boolean", "If this is true, any member may be swapped out on their turn with a reserve party member, even if unconscious or dead.", "No"],
+                                ["Bring in reserve if party KO'd", "Boolean", "If this is true, full active party defeat will instead trigger party member selection as long as at least one reserve party member is conscious.", "No"],
+                                ["Can target reserve members", "Boolean", "If this is true, the player can target reserve members with single-target beneficial effects.", "No"],
+                            ]
+                        ]
+                    ]
                 ]
             ]
         ]
