@@ -185,7 +185,7 @@ class BattleScene: # As the name suggests, the title screen.
     def handleInput(self):
         key = rl.console_check_for_keypress(rl.KEY_PRESSED) # Check if a key was pressed, but keep going if none was. Doing this instead of console_wait_for_keypress because if I use blocking input and the scene is changed due to something that isn't player input (for example, the enemies winning), then the scene would change while the game is still waiting for input to be processed by THIS scene, meaning the first key press after the transition would do nothing. Technically harmless, but annoying and unprofessional-looking.
         if key.pressed == True: # Only process key press, not key release.
-            if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
+            if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_KPENTER:
                 if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
                     return None
                 self.handleCommand(self.moveBoxes[len(self.moveBoxes)-1].forward()) # Retrieve the selected option, then send it to a separate function for processing.

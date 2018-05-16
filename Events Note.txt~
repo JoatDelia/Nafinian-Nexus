@@ -1,0 +1,220 @@
+Events come in many forms:
+
+[[[Conditional]]]
+
+There are multiple different types:
+
++- Conditional -+
+Check if: Whether member is in party/Whether member is in active party/Whether member is in reserve party/Value of variable/Amount of an item owned/Amount of an item owned and not equipped/Amount of gold
+Is: In active party/Not in active party/In party/Not in party/In reserve party/Not in reserve party
+Include otherwise: Yes
+
+Check if: Visited_Castle
+Is: Equal to/Not equal to/Greater than/Less than/Greater than or equal to/Less than or equal to
+This value: Either fixed value or another variable
+Include otherwise: Yes
+
+check if amount of: Short Sword
+Is: Equal to/Not equal to/Greater than/Less than/Greater than or equal to/Less than or equal to
+This value: Either fixed value or another variable
+Include otherwise: Yes
+
+
+
+
+
+
+
+
+
+[[[End Event]]]
+
+
+
+
+
+
+
+
+
+[[[Modify Gold]]]
+
++- Modify Gold -------+
+| Operation | Add     |
+|    Amount | 100     |
++-----------+---------+
+
+
+
+
+
+
+
+
+
+[[[Modify Inventory]]]
+
++- Modify Inventory ------------------+
+| Operation | Remove                  |
+|      Item | Rusted Sword            |
+|    Number | 1                       |
++-----------+-------------------------+
+
+
+
+
+
+
+
+
+
+[[[Move Party]]]
+
++- Move Party --------------------------+
+|         Map | Verusa_Map              |
+| Coordinates | 120, 37                 |
+|  Transition | Box Out                 |
++-------------+-------------------------+
+
+If the map is randomized, the coordinates will be replaced with with an event selector. When the movement is triggered, it will search for an event on the map. If more than one exists, the first one found will be chosen. If the event is not found, an error will occur.
+
+
+
+
+
+
+
+
+
+[[[Random Branching]]]
+
++- Random Branching -----------------------------------------------------------+
+| Branches | 5                                                                 |
+|    Even? | No                                                                |
+|  Chances | 10%, 20%, 30%, 15%, 25%                                           |
++----------+-------------------------------------------------------------------+
+
+The last row does not appear if "Even?" is Yes.
+
+
+
+
+
+
+
+
+
+[[[Screen Blank]]]
+
++- Screen Blank -+
+|       On       | or Off
++----------------+
++- Description ----------------------------------------------------------------+
+| Screen Blank: If turned on, everything but text boxes will be blacked out.   |
+| Will be reverted automatically at the end of the event.                      |
++------------------------------------------------------------------------------+
+
+
+
+
+
+
+
+
+
+[[[Set Variable]]]
+
++- Set Variable ----------------------+
+|  Variable | Visited_Arvela          |
+| New Value | TRUE                    |
++-----------+-------------------------+
+
+
+
+
+
+
+
+
+
+[[[Show Text]]]
+
++- Show Text ---------+--------------------------------------------------------+
+|               Width | 50                                                     |
+|              Height | 24                                                     |
+| Horizontal Position | Center                                                 |
+|   Vertical Position | Center                                                 |
+|               Image | Bedroom_sideshot.png                                   |
+|      Image Position | Right                                                  |
+|             Choices | None                                                   |
+|                Text | You wake up in your room, it’s just as you remember    |
+|                     | it... walls of stone and wood, beams to support the    |
+|                     | thatch roof, a chest full of your favorite clothes, a  |
+|                     | chest full of wooden weapons and toys from your youth, |
+|                     | and of course your wooden bed with a leather mattress  |
+|                     | and wool sheets that you push back when you’re ready.  |
+|                     | You walk into the washroom and use the wooden pump to  |
+|                     | draw water and wash your face. You groan a little and  |
+|                     | stretch, ready to face the day. Today is the day you   |
+|                     | planned on clearing out the nearby mine like you       |
+|                     | promised the village and your mom. You live in the     |
+|                     | walled city of Nenarat, a place founded by a joint     |
+|                     | group of Wyveri, Ampitera, and Munitara- or as human   |
+|                     | often call them: Wyverns, Amphiteres, and Draakes.     |
+|                     | You’re sure there are other names for them as well,... |
++---------------------+--------------------------------------------------------+
++------------------------------------------------------------------------------+
+| Show Text: Show a text box, possibly including an image and/or a branching   |
+| decision.                                                                    |
++------------------------------------------------------------------------------+
+
+- Width: 20-80, default, or maximum. If default, then it will be the minimum required width to show on one line, or max if it cannot be shown on one line. If Left or Right image position is chosen, the max width will be reduced accordingly.
+- Height: 3-24, default, or maximum. If default, then it will be the minimum required height to show everything, or max if it cannot all be shown at once with the specified width.
+- Horizontal Position: Left, center, or right
+- Vertical Position: Top, center, or bottom
+- Image: Image to show. Images too large to fit on the screen and allow a text box to be shown alongside will be rejected.
+- Image Position: Top of Left, Middle of Left, Bottom of Left, Left of Top, [et cetera...], or Background. The options available depend on the dimensions of the image.
+
+
+
+
+
+
+
+
+
+[[[Step Movement]]]
+
++- Step Movement ----+------+
+|          Direction | NE   |
+|    Number of Steps | 3    |
+| Time Between Steps | 10ms |
++--------------------+------+
+
+
+
+
+
+
+
+
+
+[[[Trigger Event]]]
+
+This will trigger an event selection box akin to the one for editing events (though without "New Event", of course).
+
+The triggering event will continue execution once the triggered event ends.
+
+
+
+
+
+
+
+
+
+[[[Wait]]]
+
++- Wait -+
+| 2700ms |
++--------+

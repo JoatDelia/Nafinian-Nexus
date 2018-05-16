@@ -37,6 +37,5 @@ def main(): # The main function for the game. Individual scenes handle most of t
     while not rl.console_is_window_closed(): # As long as the X icon is not pressed...
         checkForSceneChange(currentScene.handleInput()) # Ask the current scene to handle input for us. In most cases, nothing further needs to be done. However, if a command comes back, we need to change the scene accordingly (invalid commands are ignored).
         refreshDisplay()
-        
     
 main()

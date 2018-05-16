@@ -1,30 +1,43 @@
 ==========Nafinian Nexus Modding Menu Notes==========
 
+NOTE: I forgot to put it in these mock-ups, but selection boxes such as Characters, Deities, Spells, and the like should have a Copy and a Delete option.
+
 When first one enters the Modding Menu, they are asked if they wish to make a new mod, open an existing one, or duplicate and open an existing one.
 
 [[[Basic Details]]]
-Label               Type            Function
-"Name:"             Text Field      Name of the mod
-"Credits..."        Button          Leads to Credits submenu
-"This is an:"       Multiple Choice If "Adventure", this is a stand-alone mod. If "Add-On", this is meant to modify existing adventures.
-"Modifiable by:"    Multiple Choice Can be "Anything", "Add-ons meant for this adventure", "Nothing". Only appears if this is an adventure.
-"Can modify:"       Text Field      Help text will note that leaving this empty means it can modify any adventure that allows itself to be modified by any add-ons. This only appears if this is an add-on.
-"Requires..."       Button          Leads to the Requires submenu
-"Title Image:"      File Select     As the name implies.
-"Title Music:"      File Select     As the name implies.
+Label                   Type            Function
+"Name:"                 Text Field      Name of the mod
+"Credits..."            Button          Leads to Credits submenu
+"This is an:"           Multiple Choice If "Adventure", this is a stand-alone mod. If "Add-On", this is meant to modify existing adventures.
+"Modifiable by:"        Multiple Choice Can be "Anything", "Add-ons meant for this adventure", "Nothing". Only appears if this is an adventure.
+"Can modify:"           Text Field      Help text will note that leaving this empty means it can modify any adventure that allows itself to be modified by any add-ons. This only appears if this is an add-on.
+"Requires..."           Button          Leads to the Requires submenu
+"Title Image:"          File Select     As the name implies.
+"Title Music:"          File Select     As the name implies.
+"Default Game Flags:"   Button          See event notes. Adventure only.
+"Starting Party:"       Button          Leads to starting party selection box. if the starting party includes one or more custom character slots, character creation will begin as soon as the adventure begins. Adventure only.
 
 There will be a static text message as well, reading: "Remember to back up your work often!"
 
 
 +- Basic Details --------------------------------------------------------------+
-|          Name | Galactic Nexus                                               |
-|   Title Image | gnexus.png                                                   |
-|   Title Music | galactic_nexus.ogg                                           |
-|    This is an | Adventure                                                    |
-| Modifiable By | Anything                                                     |
-|   Requires... |                                                              |
-|    Credits... |                                                              |
-+---------------+--------------------------------------------------------------+
+|                       Name | Galactic Nexus                                  |
+|                 This is an | Adventure                                       |
+|                Title Image | gnexus.png                                      |
+|                Title Music | galactic_nexus.ogg                              |
+|       Default Battle Music | battle.ogg                                      |
+|              Victory Music | victory.ogg                                     |
+|              Modifiable By | Anything                                        |
+|              Modifiable By | Anything                                        |
+|        Selectable Races... |                                                 |
+|      Selectable Classes... |                                                 |
+|        Selectable Feats... |                                                 |
+|                Requires... |                                                 |
+| Default Game Parameters... |                                                 |
+|                 Credits... |                                                 |
++----------------------+-------------------------------------------------------+
+|                     Remember to back up your work often!                     |
++------------------------------------------------------------------------------+
 
 
 __Credits Submenu__
@@ -112,19 +125,133 @@ NOTE: The "Current" box and instructions only show if the user is in "Edit Appea
 
 
 
+[[[Characters]]]
++- Characters ------------+-------------------------+--------------------------+
+| [Custom #1]             | [Custom #2]             | [Custom #3]             #|
+| Benjamin                | Gina                    | Alzoru                  #|
+| Dismas                  |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
+|                         |                         |                         #|
++-----------------------+-+-------------------------+-+------------------------+
+                        |  New Character (ctrl+enter) |
+                        +-----------------------------+
+
++- Character +-----------------------------------------------------------------+
+| Name       | B-Droid Mk.1                                                    |
+| Vital      | No                                                              |
+| Type       | Generic                                                         |
+| Race       | Droid                                                           |
+| Class      | Fighter                                                         |
+| Level      | 1                                                               |
+| Max Level  | 1                                                               |
+| Gold       | 0                                                               |
+| Attributes | 75 STR, 80 END, 40 DEX, 80 PER, 10 WIL, 20 INT, 1 CHA, 30 LUK   |
+| Feats      | Hardy                                                           |
+| Spells     | None                                                            |
+| Equipment  | Laser Arm, Shield Arm, Alloy Plating                            |
+| Inventory  | None                                                            |
+| Deity      | None                                                            |
+| Mortality  | Permadeath                                                      |
++------------+-----------------------------------------------------------------+
+
+- Type can be Normal, Custom, or Generic. Custom characters are customized by the player. Generic characters may be put in the party multiple times and will always have a number appended to their name. Only a custom character can have "Player-Defined" as a value for the options, though it is still not allowed in certain cases (for example, starting inventory and equipment, though nothing is stopping the modder from, say, taking the Arcanum approach of putting the player into a shop before the game properly starts). Also, generic characters can be put into a shop (usually in the context of a mercenary guild or a robot factory or somesuch)
+- If the character is vital, then if they perma-die, or if they die while nobody present can revive them, the game is over. This is locked at "No" if the character is "Generic".
+- Mortality can be Permadeath (deleted upon death), Normal (permadeath only if the game is configured that way), Immortal (can be brought to the brink of death, but can't be killed), or Invincible (can't be harmed).
+- In Equipment, certain slots can be locked. This is useful for, for example, an attack dog ally, who has preset weapons (their claws) and can't really wear armor.
+- In addition to specifying the starting attributes and feats, the modder can opt to specify how the recruit gains such as it levels up as well.
+
+
+
+
+
+
+
+
+
 [[[Classes]]]
+After the selection box, akin to that for animation, comes this:
+
++- Class ------------------+---------------------------------------------------+
+|                      Name | Psion                                            |
+|         Strength Modifier | -10                                              |
+|        Endurance Modifier | -10                                              |
+|        Dexterity Modifier | -5                                               |
+|       Perception Modifier | 0                                                |
+|        Willpower Modifier | +25                                              |
+|     Intelligence Modifier | 0                                                |
+|         Charisma Modifier | 0                                                |
+|      Starts With a Spell? | No                                               |
+|      Starting Feat Points | 1                                                |
+|     Gains Psionic Powers? | Yes                                              |
+|            First Power At | 1                                                |
+|  New Power Every X Levels | 5                                                |
+| Exclusive Special Attacks | None                                             |
+|                Bonus Feat | None                                             |
+|           Class Spells... |                                                  |
+|            Class Feats... |                                                  |
+|       Edit Description... |                                                  |
++--------------------------+---------------------------------------------------+
++- Description ----------------------------------------------------------------+
+| A psychic-powered person. Willpower is the name of their game.               |
+|                                                                              |
++------------------------------------------------------------------------------+
+
 Note: The default class is "None", with no stat modifiers, no class spells, no class feats, and the description (though such will likely never be seen) of: "Nice person though they may be, this character lacks class."
 
-Label                       Type            Function
-"Name:"                     Text Field      Name of the class.
-"STR:" etc.                 Number Field    How the given stats are modified by taking the class.
-"Description:"              Text Field      The description given when the class is highlighted.
-"Class Spells:"             Button          Goes to a sub-menu listing all spells, with a checkbox next to each.
-"Class Feats:"              Button          Goes to a sub-menu listing all feats, with a checkbox next to each. The exception is any feat listed as "available to all classes".
-"Starts with a spell:"      Check Box       If true, the character gets to select one spell from their class list to start with.
-"Gains psionic powers:"     Check Box       If true, the class gains psionic powers.
-"Starting at:"              Number Field    Level to gain the first psionic power. Only shows if the above is true.
-"Every X levels:"           Number Field    After the first psionic power, how many levels need to be gained to gain further powers. Only shows if "Gains psionic powers" is true.
+
+
+
+
+
+
+
+
+[[[Deities]]]
+
+This is a fairly simple menu, since each deity has a name, a description, and nothing else.
+
+
+
+
+
+
+
+
+
+[[[Enemy Groups]]]
+
++- Enemy Group -+-------------------------+
+|          Name | One Bun                 |
+|       Enemy 1 | Dust Bunny              |
+|       Enemy 2 |                         |
+|       Enemy 3 |                         |
+|       Enemy 4 |                         |
+|       Enemy 5 |                         |
+|       Enemy 6 |                         |
+|     Predatory | No                      |
+|      Suicidal | Yes                     |
+|   Start Event |                         |
+| Victory Event |                         |
+|  Defeat Event |                         |
+| On Appears If |                         |
++---------------+-------------------------+
+
+"Predatory" means the group will appear even to underleveled parties, while "Suicidal" means the inverse.
 
 
 
@@ -135,13 +262,20 @@ Label                       Type            Function
 
 
 [[[Equipment]]]
+Pretty much just like class, but...
+
 Label           Type                Function
 "Name:"         Text Field          Name of the equipment.
 "Type:"         Multiple Choice     Can be any of the different equipent types.
 "STR:" etc.     Number Field        How the given stats are modified by the equipment.
+"Slot:"         Multiple Choice     Which slot the item is equipped to.
 "Animation:"    Select Box          Select which animation to play when attacking with this weapon.
 "Description:"  Text Field          The description given when the equipment is highlighted.
 "Enchantment:"  Select Box          Selects from existing enchantments something that this weapon will have by default. May select up to two.
+"Cost:"         Number Field        How much the item costs in a shop.
+"Weight:"       Number Field        How much the item weighs.
+
+Additionally, there is another menu, which allows specifying the list of different weapon types.
 
 
 
@@ -154,10 +288,187 @@ Label           Type                Function
 [[[Events]]]
 The first menu is a selection screen, including a "New Event..." option, which opens up the event creation dialogue:
 
-Label           Type        Function
-"Name:"         Text Field  Name of the event.
-"Edit Event"    Button      Goes the the event editing screen, which is enough to pretty much warrant a document all to itself.
++- Event -----------------------+
+| Name: Enter_Arvela            |
++-------------------------------+----------------------------------------------+ 
+| 001 Move Party: (40,80) Arvela Town                                         #|
+| 002 Branch: Check if Visited_Arvela = FALSE                                 #|
+|     | If So:                                                                #|
+| 003 | | Open Text Box: "As you enter, the first thing you notice is the ... #|
+| 004 | | Set Variable: Visited_Arvela = TRUE                                 #|
+|     | Otherwise:                                                            #|
+|     End Branch                                                              #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
+|                                                                             #|
++------------------------------------------------------------------------------+
+          SPACE: Edit Event    ENTER: New Event   DELETE: Remove Event
+    CTRL+C: Copy   CTRL+V: Paste   CTRL+X: Cut   CTRL+Z: Undo   CTRL+Y: Redo
+                 CTRL+UP/DOWN: Move Event (can't move branches)
 
+NOTE: Whether it shows CTRL+Y or CTRL+SHIFT+Z will depend on the OS it's running on. Either way, either one will work. Similarly, on mac, it'll show "CMD" instead of "CTRL". Note to self: https://stackoverflow.com/questions/1854/python-what-os-am-i-running-on
+
+
+
+
+
+
+
+
+
+[[[Feats]]]
+After the predictable feat selection screen...
+
++- Feat ------------+----------------------------------------------------------+
+|              Name | Rookie Enchanter                                         |
+|            Effect | No intrinsic effect                                      |
+|           FP Cost | 1                                                        |
+| Stat Requirements | 85 INT, 85 WIL                                           |
+| Feat Requirements | None                                                     |
+|       Description | Allows you to enchant weapons and armor.                 |
+|                   |                                                          |
+|                   |                                                          |
++-------------------+----------------------------------------------------------+
+
+If a feat has "no intrinsic effect", that means that it's up to events to make the feat do something. In the above example, the player would have to interact with an enchanting table, at which point a crafting menu opens up. In some other cases, a tile may require a certain feat to be entered.
+
+If the feat has feat requirements, the "Overrides" option will be available, which will nullify the effects of the prerequisite feats.
+
+Possible Effects:
+- Modify stats: This leads to a menu that allows selecting the stat(s) to modify, as well as how much to modify it by.
+- Reduce run stamina cost
+- Reduce climb stamina cost
+- Shop discount
+- Modify resistances
+- Increase summon duration
+- Reduce cross-class casting penalty
+- Extra damage versus monster type (note: monsters will have an "allows extra damage from feats" parameter)
+- Modify stats under HP threshold
+- Improve weapon efficiency (allows selecting a specific type, or simply all types)
+- Improve armor efficiency (allows selecting a specific type, or simply all types)
+- Increase damage output (includes options for certain elements, all elements, physical attacks, psionics, et cetera)
+- Extra HP regeneration
+- Extra MP regeneration
+- Extra regeneration when resting (so, basically the Meditation feat)
+- Increase travel speed
+- Reduce status effect chance
+- Allow scaring away enemies (this requires a charisma check, which automatically fails if the battle does not allow escape - the feat creator is allowed to specify a bonus or penalty for this feat)
+- Modify carrying capacity
+- Increase FP rate
+- Increase stats with certain weapons
+- Allow auto-revive
+- Reduce FP cost
+- Cascading attacks (see Azburind)
+- Gain exclusive spell effect
+- Gain exclusive special attack
+- Gain exclusive psionic power (automatically unavailable to those who don't gain psionics)
+- 1/day stat buff
+
+
+
+
+
+
+
+
+
+[[[Items]]]
+Oh, the many types there are...
+
+
+
+Label           Type                Function
+"Name:"         Text Field          Name of the equipment.
+"Type:"         Multiple Choice     Can be any of the different equipent types.
+"STR:" etc.     Number Field        How the given stats are modified by the equipment.
+"Animation:"    Select Box          Select which animation to play when attacking with this weapon.
+"Description:"  Text Field          The description given when the equipment is highlighted.
+"Enchantment:"  Select Box          Selects from existing enchantments something that this weapon will have by default. May select up to two.
+"Cost:"         Number Field        How much the item costs in a shop.
+"Weight:"       Number Field        How much the item weighs.
+
+
+
+
+
+
+
+
+
+[[[Races]]]
+After the selection box, akin to that for animation, comes this:
+
++- Race -------------------+---------------------------------------------------+
+|                      Name | Ferati                                           |
+|         Strength Modifier | -15                                              |
+|        Endurance Modifier | +10                                              |
+|        Dexterity Modifier | 0                                                |
+|       Perception Modifier | 0                                                |
+|        Willpower Modifier | +10                                              |
+|     Intelligence Modifier | 0                                                |
+|         Charisma Modifier | -5                                               |
+|               Resistances | +25% Ice, -25% Fire                              |
+|            Body Heat Type | Exothermic                                       |
+|                Extra Feat | None                                             |
+| Exclusive Special Attacks | Bite, Tail Slap                                  |
+|       Edit Description... |                                                  |
++--------------------------+---------------------------------------------------+
++- Description ----------------------------------------------------------------+
+| A psychic-powered person. Willpower is the name of their game.               |
+|                                                                              |
++------------------------------------------------------------------------------+
+
+
+
+
+
+
+
+
+
+[[Screens]]
+Functionally identical to maps, except that they each represent one tile on a map. To compare to Link's Awakening, the map is what you get when pressing "Select" in that game, while the screen is what you move around in normally.
+
+
+
+
+
+
+
+
+
+[[[Special Attacks]]]
+
+This is basically equivalent to Spells, except tthat there is an "Availability" parameter, which can be "Everyone", "Only weapons that use [STAT]", or "Specific races/classes".
+
+
+
+
+
+
+
+
+
+[[[Spells]]]
++- Spell --------+-------------------------+
+|           Name | Bubble Attack           |
+|        MP Cost | 6                       |
+|           Type | Offensive               |
+|         Damage | INTmod + 1d6 + 10       |
+|  Status Effect | None                    |
+|  Status Chance | N/A                     |
+|         Target | Single Enemy            |
+|  In Spellbooks | Yes                     |
+|  Feat Required | None                    |
+| Deity Required | None                    |
++----------------+-------------------------+
 
 
 
@@ -178,7 +489,7 @@ This leads to a list of variables
 
 
 
-[[[World Map]]]
+[[[Maps]]]
 This menu first opens up into a map selection screen, with an "Add New Map", which will give the option to either create a static map or a dynamic map. Static maps are made in advance, while dynamic maps are generated differently each playthrough. For dynamic maps, see the steps system example at the bottom of the document.
 
 
@@ -187,8 +498,10 @@ Label               Type        Function
 "Name:"             Text Field  Name of the map
 "Size ????x????"    Label       Right next to...
 "Resize"            Button      Opens a separate window to input the new dimensions, each of which can be up to four digits long. If the size is reduced, the user must further specify in what way it should be reduced (in other words, which sides tiles should be removed from).
+"One-Time Event"    Select Box  An event to activate when first entering the map.
 "Edit Map"          Button      In bottom left. Goes to the map editing screen.
 "Edit Events"       Button      In bottom right. Goes to event editing screen.
+"Edit Encounters"   Button      In bottom right. Goes to a menu to edit what encounters appear.
 
 
 __Map Editing Screen__
@@ -221,6 +534,19 @@ C: Copy event
 V: Paste event
 X: Cut event
 Shift+Tab: Switch to map editing.
+
+
+__Encounter Editing Screen__
+
++- Encounters ------------------+
+|   Global | Traveling_Merchant |
+|          | Bandit             |
+| Mountain |                    |
+|    Water | Lake Monster       |
+|   Plains | Dust Bunny         |
++----------+--------------------+
+
+Either enemy groups or events can be listed here. Global encounters can happen anywhere.
 
 
 

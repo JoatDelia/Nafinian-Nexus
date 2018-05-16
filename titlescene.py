@@ -19,7 +19,7 @@ class TitleScene: # As the name suggests, the title screen.
     def handleInput(self):
         key = rl.console_check_for_keypress(True) # Halt until a key is pressed. Note that this is a blocking function (will not proceed until a key is pressed), and thus should never be used if refresh() is capable of changing the scene.
         if key.pressed == True: # Only process key press, not key release.
-            if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_SPACE or key.vk == rl.KEY_KPENTER:
+            if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_KPENTER:
                 command = self.box.forward() # Retrieve the selected option.
                 if command == "Exit":
                     raise SystemExit # Exit
@@ -27,7 +27,6 @@ class TitleScene: # As the name suggests, the title screen.
                     return "DevMenuScene"
                 elif command == "New Game":
                     return "BattleScene"
-                print(command) # Just print it for now.
                 return None
             elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
                 self.box.goDown() # Go down one item.

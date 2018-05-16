@@ -1,0 +1,489 @@
+Events come in many forms:
+
+[[[Access Storage]]]
+
+Access the storage interface. The option for a transaction fee is available.
+
+
+
+
+
+
+
+
+
+
+[[[Battle]]]
+
++- Battle -----+-------------------------+
+|  Enemy Group | Arena_Lions             |
+|        Music | Default                 |
+|   Background | Default                 |
+|   Can Escape | No                      |
+| Special Flag | Gladitorial             |
++--------------+-------------------------+
+
+
+
+
+
+
+
+
+
+[[[Cancel Movement]]]
+
+Only valid when the event is triggered by trying to move into a tile. If this is called, prevent the party from doing so.
+
+
+
+
+
+
+
+
+
+[[[Change BGM]]]
+"Default" is the first option, "None" is the second, and "Default Battle" is the third, but otherwise this is a simple BGM selection box.
+
+
+
+
+
+
+
+
+
+[[[Character Generation]]]
+
+Open character generation box. Note that this opens up automatically if one tries to add a non-generated character to the party.
+
+
+
+
+
+
+
+
+
+[[[Comment]]]
+
+Does not impact the event in the slightest, but can be useful to keep track of what does what.
+
+
+
+
+
+
+
+
+
+[[[Conditional]]]
+
+There are multiple different types:
+
++- Conditional ------+---------------------------------------------------------+
+|           Check if | Whether Benjamin is in party                            |
+|       Include dead | No                                                      |
+|    Include reserve | ONLY reserve                                            |
+|                 Is | Equal to                                                |
+|         This value | TRUE                                                    |
+| Include otherwise? | Yes                                                     |
++--------------------+---------------------------------------------------------+
+
+Check if: Whether member is in party/Value of variable/Amount of an item owned/Amount of an item owned and not equipped/Is item equipped/Amount of gold/Spell is known/Average level/Effective party level/Maximum level/Minimum level
+By: Only applicable to inventory-related. Can be full party, active party, reserve party, or a specific member
+Include Reserve: Can be Yes, No, or ONLY reserve
+Is: Equal to/Not equal to/Greater than/Less than/Greater than or equal to/Less than or equal to (depends on type of variable chosen above)
+This value: Either fixed value or another variable
+
+NOTE: Effective level is calculated by taking all party members, adding up how much EXP was necessary to get to their level, the figuring out what level that theoretical character would be at.
+
+
+
+
+
+
+
+
+[[[Change Game Parameters]]]
+
++- Change Game Parameters -------+--------------+
+|            Override battle BGM | Off          |
+|              No random battles | On           |
+|                     Permadeath | On           |
+|       Reserve members gain EXP | 50%          |
+|          KO'd members gain EXP | 25%          |
+|      Can modify party anywhere | Don't Change |
+|     Can modify party in combat | Don't Change |
+| Bring in reserve if party KO'd | Don't Change |
+|     Can target reserve members | Don't Change |
++--------------------------------+--------------+
+
+Note: When configuring the default game parameters, Permadeath has an additional option: Opt-In. If this is chosen, the player will be given the option to play the game in Permadeath Mode.
+
+
+
+
+
+
+
+
+
+[[[End Event]]]
+
+
+
+
+
+
+
+
+
+[[[Ending]]]
+
++- Ending ---+----------------------+
+|      Music | happy_end.ogg        |
+| Background | starry_sky.png       |
++------------+----------------------+
+
+
+
+
+
+
+
+
+
+[[[Game Over]]
+
+
+
+
+
+
+
+
+
+
+[[[Label]]]
+
+Purely exists to be jumped to.
+
+
+
+
+
+
+
+
+
+[[[Modify Characters]]]
+
++-----------+-------------------+
+| Character | Benjamin          |
+|    Modify | Stamina Points    |
+| Operation | Increase          |
+|    Amount | 9999              |
++-----------+-------------------+
+
+Options for Character can also include "All", "All Active Party", "All Reserve Party". Generic party members cannot be selected. If an equipment type is chosen, the additional "Even if not owned?" option will be shown if set to equip, or "With equipped?" will be shown if set to unequip, for which the options are "Destroy", "Put in inventory", "Store if no room in inventory", or "Store". "All Equipment" can only be set to unequip. If an item is put into inventory which does not have room, it'll force it to go above capacity regardless.
+
+
+
+
+
+
+
+
+
+[[[Modify Enemiess]]]
+
+As Modify Characters, for the most part. Does nothing if invoked outside battle.
+
+
+
+
+
+
+
+
+
+[[[Modify Gold]]]
+
++- Modify Gold -------+
+| Operation | Add     |
+|    Amount | 100     |
++-----------+---------+
+
+
+
+
+
+
+
+
+
+[[[Modify Inventory]]]
+
++- Modify Inventory ------------------+
+| Operation | Remove                  |
+|      Item | Rusted Sword            |
+|    Number | 1                       |
++-----------+-------------------------+
+
+
+
+
+
+
+
+
+
+[[[Modify Party]]]
+
++- Modify Party ------------------------------------------------+
+| Action | Add to active party if slot is open, reserve if not. |
+| Member | Diartana                                             |
++--------+------------------------------------------------------+
+
+Actions include:
+- Add to active party if slot is open, reserve if not.
+- Add to active party
+- Add to reserve party
+- Move from active to reserve party
+- Move from reserve to active party
+- Remove from party
+
+If the party member selected is generic, then an additional "quantity" field will show up.
+
+
+
+
+
+
+
+
+
+[[[Modify Party Slots]]]
+
++- Modify Party Slots +------------------+
+| Slot 1 Party Member | Custom #1        |
+|         Lock Slot 1 | Yes              |
+| Slot 2 Party Member | Unspecified      |
+|         Lock Slot 2 | No               |
+| Slot 3 Party Member | Unspecified      |
+|         Lock Slot 3 | No               |
+| Slot 4 Party Member | None             |
+|         Lock Slot 4 | Yes              |
++---------------------+------------------+
+
+The above would create the classic "can't drop the hero" scenario, while also restricting the party size to 3.
+
+
+
+
+
+
+
+
+
+[[[Move Party]]]
+
++- Move Party --------------------------+
+|         Map | Verusa_Map              |
+| Coordinates | 120, 37                 |
+|  Transition | Box Out                 |
++-------------+-------------------------+
+
+If the map is randomized, the coordinates will be replaced with with an event selector. When the movement is triggered, it will search for an event on the map. If more than one exists, the first one found will be chosen. If the event is not found, an error will occur.
+
+
+
+
+
+
+
+
+
+[[[Play Sound]]]
+
++- Play Sound ------------------------------+
+|           Sound | wakeup.wav              |
+| Wait until done | Yes                     |
++-----------------+-------------------------+
+
+
+
+
+
+
+
+
+
+[[[Random Branching]]]
+
++- Random Branching -----------------------------------------------------------+
+| Branches | 5                                                                 |
+|    Even? | No                                                                |
+|  Chances | 10%, 20%, 30%, 15%, 25%                                           |
++----------+-------------------------------------------------------------------+
+
+The last row does not appear if "Even?" is Yes.
+
+
+
+
+
+
+
+
+
+[[[Screen Blank]]]
+
++- Screen Blank -+
+|       On       | or Off
++----------------+
++- Description ----------------------------------------------------------------+
+| Screen Blank: If turned on, everything but text boxes will be blacked out.   |
+| Will be reverted automatically at the end of the event.                      |
++------------------------------------------------------------------------------+
+
+
+
+
+
+
+
+
+
+[[[Set Variable]]]
+
++- Set Variable ----------------------+
+|  Variable | Visited_Arvela          |
+| New Value | TRUE                    |
++-----------+-------------------------+
+
+Rather than set a fixed value, however, the modder will also be able to set something based on another variable, party size, or any number of things. If User Input is chosen, additional fields are shown: Type and (if numerical) Upper/Lower Bound
+
+
+
+
+
+
+
+
+
+[[[Shop]]]
+
++- Shop +-------------------------+
+| Title | Iggy's Incredible Items |
+| Items | Covered Rock            |
+|       | Cut Paper               |
+|       | Crushed Scissors        |
++-------+-------------------------+
+
+
+
+
+
+
+
+
+[[[Show Image]]]
+
++- Show Image --------+-------------------------+
+|               Image | bottom_town.png         |
+| Horizontal Position | Center                  |
+|   Vertical Position | Bottom                  |
++---------------------+-------------------------+
+
+
+
+
+
+
+
+
+
+[[[Show Text]]]
+
++- Show Text ---------+--------------------------------------------------------+
+|               Width | 50                                                     |
+|              Height | 24                                                     |
+| Horizontal Position | Center                                                 |
+|   Vertical Position | Center                                                 |
+|               Image | Bedroom_sideshot.png                                   |
+|      Image Position | Right                                                  |
+|             Choices | None                                                   |
+|                Text | You wake up in your room, it’s just as you remember    |
+|                     | it... walls of stone and wood, beams to support the    |
+|                     | thatch roof, a chest full of your favorite clothes, a  |
+|                     | chest full of wooden weapons and toys from your youth, |
+|                     | and of course your wooden bed with a leather mattress  |
+|                     | and wool sheets that you push back when you’re ready.  |
+|                     | You walk into the washroom and use the wooden pump to  |
+|                     | draw water and wash your face. You groan a little and  |
+|                     | stretch, ready to face the day. Today is the day you   |
+|                     | planned on clearing out the nearby mine like you       |
+|                     | promised the village and your mom. You live in the     |
+|                     | walled city of Nenarat, a place founded by a joint     |
+|                     | group of Wyveri, Ampitera, and Munitara- or as human   |
+|                     | often call them: Wyverns, Amphiteres, and Draakes.     |
+|                     | You’re sure there are other names for them as well,... |
++---------------------+--------------------------------------------------------+
++------------------------------------------------------------------------------+
+| Show Text: Show a text box, possibly including an image and/or a branching   |
+| decision.                                                                    |
++------------------------------------------------------------------------------+
+
+- Width: 20-80, default, or maximum. If default, then it will be the minimum required width to show on one line, or max if it cannot be shown on one line. If Left or Right image position is chosen, the max width will be reduced accordingly.
+- Height: 3-24, default, or maximum. If default, then it will be the minimum required height to show everything, or max if it cannot all be shown at once with the specified width.
+- Horizontal Position: Left, center, or right
+- Vertical Position: Top, center, or bottom
+- Image: Image to show. Images too large to fit on the screen and allow a text box to be shown alongside will be rejected.
+- Image Position: Top of Left, Middle of Left, Bottom of Left, Left of Top, [et cetera...], or Background. The options available depend on the dimensions of the image.
+
+
+
+
+
+
+
+
+
+[[[Step Movement]]]
+
++- Step Movement ----+------+
+|          Direction | NE   |
+|    Number of Steps | 3    |
+| Time Between Steps | 10ms |
++--------------------+------+
+
+
+
+
+
+
+
+
+
+[[[Trigger Event]]]
+
+This will trigger an event selection box akin to the one for editing events (though without "New Event", of course).
+
+The triggering event will continue execution once the triggered event ends.
+
+
+
+
+
+
+
+
+
+[[[Wait]]]
+
++- Wait -+
+| 2700ms |
++--------+
