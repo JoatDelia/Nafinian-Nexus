@@ -183,27 +183,32 @@ class BattleScene: # As the name suggests, the title screen.
                 box.draw(rl.white)
     
     def handleInput(self):
-        key = rl.console_check_for_keypress(rl.KEY_PRESSED) # Check if a key was pressed, but keep going if none was. Doing this instead of console_wait_for_keypress because if I use blocking input and the scene is changed due to something that isn't player input (for example, the enemies winning), then the scene would change while the game is still waiting for input to be processed by THIS scene, meaning the first key press after the transition would do nothing. Technically harmless, but annoying and unprofessional-looking.
-        if key.pressed == True: # Only process key press, not key release.
-            if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_KPENTER:
-                if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
-                    return None
+        key = rl.Key() # Set up the variables for mouse and key input.
+        mouse = rl.Mouse()
+        rl.sys_check_for_event(rl.EVENT_KEY_PRESS|rl.EVENT_MOUSE,key,mouse) # Update the key and mouse variables if a key or mouse button was pressed.
+        if key.vk == rl.KEY_ENTER or key.vk == rl.KEY_KPENTER or mouse.lbutton_pressed:
+            if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
+                return None
+            command = None
+            if mouse.lbutton_pressed: # If the mouse was clicked, attempt to retrieve a result.
+                self.handleCommand(self.moveBoxes[len(self.moveBoxes)-1].handleClick(mouse))
+            if (key.vk == rl.KEY_ENTER or key.vk == rl.KEY_KPENTER) and command == None: # If a key was pressed and a mouse click did not occur or yield any results:
                 self.handleCommand(self.moveBoxes[len(self.moveBoxes)-1].forward()) # Retrieve the selected option, then send it to a separate function for processing.
-                return None
-            elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
-                if len(self.moveBoxes) > 0:
-                    self.moveBoxes[len(self.moveBoxes)-1].goDown() # Go down one item.
-                return None
-            elif key.vk == rl.KEY_UP or key.vk == rl.KEY_KP8:
-                if len(self.moveBoxes) > 0:
-                    self.moveBoxes[len(self.moveBoxes)-1].goUp() # Go up one item.
-                return None
-            elif key.vk == rl.KEY_ESCAPE: # Remove the latest move box, if there are more than one.
-                if len(self.moveBoxes) > 1:
-                    self.moveBoxes.pop()
-            elif key.vk == rl.KEY_F4 and rl.console_is_key_pressed(rl.KEY_ALT):
-                raise SystemExit # Pressing Alt+F4 is against the laws of the game and is punishable with exile.
-                return None
+            return None
+        elif key.vk == rl.KEY_DOWN or key.vk == rl.KEY_KP2:
+            if len(self.moveBoxes) > 0:
+                self.moveBoxes[len(self.moveBoxes)-1].goDown() # Go down one item.
+            return None
+        elif key.vk == rl.KEY_UP or key.vk == rl.KEY_KP8:
+            if len(self.moveBoxes) > 0:
+                self.moveBoxes[len(self.moveBoxes)-1].goUp() # Go up one item.
+            return None
+        elif key.vk == rl.KEY_ESCAPE or mouse.rbutton_pressed: # Remove the latest move box, if there are more than one.
+            if len(self.moveBoxes) > 1:
+                self.moveBoxes.pop()
+        elif key.vk == rl.KEY_F4 and rl.console_is_key_pressed(rl.KEY_ALT):
+            raise SystemExit # Pressing Alt+F4 is against the laws of the game and is punishable with exile.
+            return None
         return None
     
     def handleCommand(self,command): # Handle pressing Enter in a choice box. I put this in a separate function because there will be many options and I don't want the key handling function to get too large.

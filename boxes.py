@@ -4,6 +4,8 @@ import time
 
 import math
 
+import copy
+
 import tkinter as tk
 
 from tkinter import filedialog
@@ -74,6 +76,10 @@ class Box: # The class for completely non-interactive boxes, superclass for inte
     
     def setHeight(self,newH): # This is pretty much just here for the turn order box. Most boxes have no business changing size after creation.
         self.h = newH
+    
+    def handleClick(self, mouse): # Handle a left click.
+        if mouse.cx >= self.x and mouse.cx < self.x + self.w and mouse.cy >= self.y and mouse.cy < self.y + self.h: # If the click is in bounds, call forward().
+            return self.forward()
 
 class SelectBox(Box): # This box allows selecting from a number of options.
     def __init__(self,x,y,w,h,title,options,optCap):
@@ -157,6 +163,12 @@ class SelectBox(Box): # This box allows selecting from a number of options.
             self.optOffset = self.selectedOption
         if self.selectedOption + 1 >= self.optOffset + self.optCap: # If the option selected is below the listed options, fix that.
             self.optOffset = self.selectedOption - self.optCap + 1
+    
+    def handleClick(self, mouse): # Handle a left click.
+        if mouse.cx >= self.x + 1 and mouse.cx < self.x + self.w - 1 and mouse.cy >= self.y + 1 and mouse.cy < self.y + self.h - 1: # If the click is in bounds
+            if mouse.cy - self.y - 1 + self.optOffset < len(self.options): # If the click is in a space that has an option in it.
+                self.selectedOption = mouse.cy - self.y - 1 + self.optOffset # Select the clicked option
+                return self.forward() # Then call forward()
 
 class TargetBox(SelectBox): # This box allows selecting between conscious enemies.
     def __init__(self,x,y,members):
@@ -179,9 +191,13 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         self.x = 0
         self.y = 12 - math.ceil(self.h/2)
         self.dividerX = 5 # The dividing line between the options and their values.
-        for option in menuObj[3]:
-            if len(option[0]) + 5 > self.dividerX:
-                self.dividerX = len(option[0]) + 5
+        for option in menuObj[3]: # Determine where the dividing line should be.
+            if option[0] == None: # If the first field of the sub-menu is used, go by its MAX length, not its current. 
+                if option[3][0][4] + 5 > self.dividerX:
+                    self.dividerX = option[3][0][4] + 5
+            else:
+                if len(option[0]) + 5 > self.dividerX:
+                    self.dividerX = len(option[0]) + 5
         self.title = menuObj[0] # To show at the top of the box.
         self.selectedOption = 0 # The number of the currently selected option.
         self.optOffset = 0 # Controls which option should be the top option. This is needed for one to scroll through more options than the box has room for.
@@ -190,8 +206,12 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         self.currentInput = "" # The current input value, if applicable.
         self.cursorPos = 0 # The position of the cursor.
         self.inputOffset = 0 # How much the drawing of the input is offset (max 76 characters can be shown at a time).
+        self.subBox = None # The box to show choices in, when selecting the value for a multiple-choice field.
     
     def draw(self,color=rl.white):
+        if self.subBox != None: # If there is a sub-box, draw that instead.
+            self.subBox.draw()
+            return
         rl.console_rect(0, self.x, self.y, self.w, self.h, True) # Reset background color for the box.
         # Draw the corners.
         rl.console_put_char_ex(0, self.x, self.y, rl.CHAR_DNW, rl.console_get_default_foreground(0), rl.console_get_default_background(0))
@@ -217,7 +237,11 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             rl.console_print(0,self.x+2,self.y," {0} ".format(self.title))
         # Draw every option and its current value (or "..." if it leads to a new menu).
         for i,option in enumerate(self.menuObj[self.optOffset:min(self.optOffset+self.optCap,len(self.menuObj))]): # Draw the options.
-            rl.console_print(0, self.x+4, self.y+1+i, option[0])
+            if option[0] == None:
+                #print(option[3])
+                rl.console_print(0, self.x+4, self.y+1+i, option[3][0][3])
+            else:
+                rl.console_print(0, self.x+4, self.y+1+i, option[0])
             if isinstance(option[3], list):
                 rl.console_print(0, self.dividerX+2, self.y+1+i, "...")
             else:
@@ -250,6 +274,10 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
                 rl.console_print(0, self.x+self.w-1, self.y+self.h-2, chr(rl.CHAR_ARROW2_E))
     
     def forward(self): # If enter or the like is pressed and this is the active box.
+        if self.subBox != None: # If there is a sub-box, interact with that instead.
+            self.menuObj[self.selectedOption][3] = self.subBox.forward() # Store the selected option.
+            self.subBox = None # Close the sub-box.
+            return
         if self.inputMode != "": # If it's input, confirm and apply said input if it's valid, then exit input mode.
             if self.inputIsValid(self.currentInput,self.menuObj[self.selectedOption][1],self.menuObj[self.selectedOption][4]):
                 self.inputMode = ""
@@ -259,6 +287,21 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
                     self.menuObj[self.selectedOption][3] = self.currentInput
         elif self.menuObj[self.selectedOption][1] == "Menu": # If it's a menu, return said menu.
             return self.menuObj[self.selectedOption]
+        elif self.menuObj[self.selectedOption][1] == "Add": # If it's a request to add a submenu, add said submenu and return nothing.
+            self.menuObj.insert(self.selectedOption,copy.deepcopy(self.menuObj[self.selectedOption][3]))
+            # After adding the item, recalculate certain values this may affect.
+            self.optCap = min(len(self.menuObj),19)
+            self.h = self.optCap + 5
+            self.y = 12 - math.ceil(self.h/2)
+            self.dividerX = 5 # The dividing line between the options and their values.
+            for option in self.menuObj:
+                if option[0] == None:
+                    if option[3][0][4] + 5 > self.dividerX:
+                        self.dividerX = option[3][0][4] + 5
+                else:
+                    if len(option[0]) + 5 > self.dividerX:
+                        self.dividerX = len(option[0]) + 5
+            return ""
         # Toggle the boolean if it is one.
         elif self.menuObj[self.selectedOption][1] == "Boolean":
             if self.menuObj[self.selectedOption][3] == "Yes":
@@ -273,6 +316,9 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             if filename.endswith(".bmp"):
                 self.menuObj[self.selectedOption][3] = filename # I know this produces an absolute path, which is undesirable. I have plans to make this a relative path in a later update.
             # Sadly, I do not know of any way to return focus to the main window after this process is completed. Annoying, but hey, it's still more convenient then the user having to navigate a file select screen made by libtcod.
+        # Open multiple choice selection if needed.
+        elif self.menuObj[self.selectedOption][1] == "Select":
+            self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0],self.menuObj[self.selectedOption][4],-1)
         # Otherwise, just set the input mode to the option type, but only if it's a valid type.
         elif self.menuObj[self.selectedOption][1] in ("Text","Number"):
             self.inputMode = self.menuObj[self.selectedOption][1]
@@ -283,12 +329,18 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         return "" # Return nothing.
     
     def backward(self): # If escape or the like is pressed and this is the active box.
+        if self.subBox != None: # If there is a sub-box, interact with that instead.
+            self.subBox = None # Close the sub-box.
+            return
         if self.inputMode != "":
             self.inputMode = ""
         else:
             return "CLOSE" # Close the box.
     
     def goUp(self): # If up or the like is pressed.
+        if self.subBox != None: # If there is a sub-box, interact with that instead.
+            self.subBox.goUp()
+            return
         if self.inputMode != "": # Don't do anything if entering input.
             return
         self.selectedOption = (self.selectedOption + len(self.menuObj) - 1) % len(self.menuObj) # Go up one option.
@@ -298,6 +350,9 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             self.optOffset = self.selectedOption - self.optCap + 1
     
     def goDown(self): # If down or the like is pressed.
+        if self.subBox != None: # If there is a sub-box, interact with that instead.
+            self.subBox.goDown()
+            return
         if self.inputMode != "": # Don't do anything if entering input.
             return
         self.selectedOption = (self.selectedOption + 1) % len(self.menuObj) # Go down one option.
@@ -319,6 +374,8 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         return False
     
     def miscInput(self, key): # Any other keyboard input is handled here.
+        if self.inputMode == "": # Don't do anything if not inputting a value.
+            return
         if key.vk == rl.KEY_BACKSPACE and self.cursorPos > 0: # Handle backspace.
             self.currentInput = self.currentInput[:self.cursorPos-1] + self.currentInput[self.cursorPos:]
             self.cursorPos -= 1
@@ -347,3 +404,13 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             self.inputOffset = self.cursorPos
         elif self.cursorPos - self.inputOffset > 75: # If the cursor is too far right, scroll the input to catch up.
             self.inputOffset = self.cursorPos - 75
+    
+    def handleClick(self, mouse): # Handle a left click.
+        if self.subBox != None: # Handle sub-box input.
+            if self.subBox.handleClick(mouse) != None:
+                self.forward()
+                return
+        if mouse.cx >= self.x + 1 and mouse.cx < self.x + self.w - 1 and mouse.cy >= self.y + 1 and mouse.cy < self.y + self.h - 1: # If the click is in bounds
+            if mouse.cy - self.y - 1 + self.optOffset < len(self.menuObj): # If the click is in a space that has an option in it.
+                self.selectedOption = mouse.cy - self.y - 1 + self.optOffset # Select the clicked option
+                return self.forward() # Then call forward()
