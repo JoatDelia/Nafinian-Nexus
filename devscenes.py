@@ -6,12 +6,28 @@ import json
 
 import copy
 
+import tkinter as tk
+
+from tkinter import filedialog
+
+import os
+
 class DevMenuScene: # As the name suggests, the title screen.
     def __init__(self):
-        self.box = bx.SelectBox(-1,-1,-1,-1,"Modding Menu",("Edit","Save","Load","Exit"),-1) #("Basic Details","Biomes","Classes","Dialogues","Enemies","Equipment","Feats","Items","Names","Races","Screens","Spells","Save","Load","Exit"),-1) # The main menu box.
+        self.box = bx.SelectBox(-1,-1,-1,-1,"Modding Menu",("Edit","Save","Load","Exit"),-1) # The main menu box.
         self.currentBox = self.box
         self.boxes = []
-        self.defaultMenuObj = ["Edit", "Menu", "", # The entire modding menu and its current values are stored in this array. Each entry in the menu has at least four items, the first four being the label, the type, and the help text, the current value. Some items have a fifth value, representing the max value for numbers, the character limit for text, or the list of options for a multiple-choice selection field. If the fourth entry is another list, then that list represents the new menu to go into. Or, in the case of the "Add" field type, the type of submenu to add to this menu directly above the current item. However, in the case of a selection box, the fourth value is a list of the current values to select from and the fifth is the menu for when creating a new entry. If a menu has a first value of None, that means the value should instead be equal to the value of that menu's first entry.
+        self.defaultMenuObj = ["Edit", "Menu", "", # The entire modding menu and its current values are stored in this array. Each entry in the menu has at least four items, generally five. The first three being the label, the type, and the help text. The fourth and fifth items are as follows:
+#   Type            4th                 5th
+#   Add             Menu to add         N/A
+#   Boolean         Current value       N/A
+#   DisposableMenu  Submenu object      N/A
+#   File            Current value       N/A
+#   LinkedSelect    Current value       Path to menu (see objnav.py)
+#   Menu            Submenu object      N/A
+#   Number          Current value       Max value (min is 0)
+#   Select          Current value       Possible values
+#   Text            Current value       Character limit
             [
                 ["Input Test", "Menu", "Test various types of input. This will obviously be removed in the final game.",
                     [
@@ -26,6 +42,14 @@ class DevMenuScene: # As the name suggests, the title screen.
                     [
                         ["Name", "Text", "The name of this project.", "Project1", 50],
                         ["Title Image", "Image", "The image to show on the title screen. Remember, part of this will be covered by the main menu.", ""],
+                        ["Starting Party", "Menu", "The members initially in the menu. This CAN be empty if desired. Reserve members must instead be added through events.", 
+                            [
+                                ["Slot 1", "LinkedSelect", "The starting character for this slot.", "None", ("Characters",)],
+                                ["Slot 2", "LinkedSelect", "The starting character for this slot.", "None", ("Characters",)],
+                                ["Slot 3", "LinkedSelect", "The starting character for this slot.", "None", ("Characters",)],
+                                ["Slot 4", "LinkedSelect", "The starting character for this slot.", "None", ("Characters",)]
+                            ]
+                        ],
                         ["Default Game Parameters", "Menu", "Various misc. parameters that affect gameplay in various ways.", 
                             [
                                 ["Override battle BGM", "Boolean", "Do not change the music when entering or exiting combat.", "No"],
@@ -45,7 +69,7 @@ class DevMenuScene: # As the name suggests, the title screen.
                 ["Characters", "Menu", "Modify the list of characters.",
                     [
                         ["New Character", "Add", "Create a new character.",
-                            [None, "Menu", "Modify this character.",
+                            [None, "DisposableMenu", "Modify this character. Press DEL to delete this character.",
                                 [
                                     ["Name", "Text", "The character's name.", "Unnamed Chara", 16],
                                     ["Vital", "Boolean", "If reviving this character becomes impossible, the game is over.", "No"],
@@ -101,7 +125,7 @@ class DevMenuScene: # As the name suggests, the title screen.
                 command = self.currentBox.forward() # Retrieve the selected option.
             if isinstance(command, list):
                 self.boxes.append(self.currentBox)
-                self.currentBox = bx.ModdingBox(command)
+                self.currentBox = bx.ModdingBox(command,self.menuObj)
             elif command == "Exit":
                 if len(self.boxes) == 0:
                     return "TitleScene"
@@ -110,10 +134,15 @@ class DevMenuScene: # As the name suggests, the title screen.
                 return "TitleScene"
             elif command == "Edit":
                 self.boxes.append(self.currentBox)
-                self.currentBox = bx.ModdingBox(self.menuObj)
+                self.currentBox = bx.ModdingBox(self.menuObj,self.menuObj)
             elif command == "Save":
+                root = tk.Tk() # Initialize tkinter for this purpose.
+                root.withdraw() # Without this, an empty box would be drawn before opening the file selection dialogue. Both annoying and unprofessional.
+                filename = filedialog.asksaveasfilename(initialdir = os.getcwd(), initialfile = "New Mod.nnm", defaultextension = ".nnm", title = "Select file", filetypes = (("Nafinian Nexus Mod File","*.nnm"),))
+                if filename == "":
+                    return
                 try:
-                    with open('testsave.txt', 'w') as sf:
+                    with open(filename, 'w') as sf:
                         self.boxes.append(self.currentBox)
                         self.currentBox = bx.Box(-1,-1,22,-1,"File Saved","The file was saved successfully.")
                         sf.write(json.dumps(self.menuObj))
@@ -122,13 +151,18 @@ class DevMenuScene: # As the name suggests, the title screen.
                     self.currentBox = bx.Box(-1,-1,22,-1,"Error!","The file could not be written. It may be in use by another program.")
             elif command == "Load":
                 try:
-                    with open('testsave.txt', 'r') as sf:
+                    root = tk.Tk() # Initialize tkinter for this purpose.
+                    root.withdraw() # Without this, an empty box would be drawn before opening the file selection dialogue. Both annoying and unprofessional.
+                    filename = filedialog.askopenfilename(initialdir = os.getcwd(), title = "Select file", filetypes = (("Nafinian Nexus Mod File","*.nnm"),))
+                    if filename == "":
+                        return
+                    with open(filename, 'r') as sf:
                         self.menuObj = json.loads(sf.read())
                         self.menuObj[0] = "Edit"
                         self.menuObj[1] = "Menu"
                         self.mergeLoadVals(self.menuObj[3],self.defaultMenuObj[3])
                         self.boxes.append(self.currentBox)
-                        self.currentBox = bx.Box(-1,-1,22,-1,"File Saved","The file was loaded successfully.")
+                        self.currentBox = bx.Box(-1,-1,22,-1,"File Loaded","The file was loaded successfully.")
                 except IOError:
                     self.boxes.append(self.currentBox)
                     self.currentBox = bx.Box(-1,-1,22,-1,"Error!","The file could not be written. It may be in use by another program or may not exist.")

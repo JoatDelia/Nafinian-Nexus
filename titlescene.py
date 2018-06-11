@@ -4,6 +4,10 @@ import boxes as bx
 
 import actors # This will eventually go unused, but it's temporarily needed.
 
+import json
+
+from objnav import objNavigate
+
 class TitleScene: # As the name suggests, the title screen.
     def __init__(self):
         self.box = bx.SelectBox(-1,17,-1,-1,None,("New Game","Continue","Modding","Exit"),-1) # The main menu box. In the first demo, New Game and Exit will likely be the only options available.
@@ -45,7 +49,16 @@ class TitleScene: # As the name suggests, the title screen.
         return None
     
     def getParty(self):
-        members = []
+        members = [] # The empty party member array.
+        modObj = None # The mod loaded.
+        try:
+            with open('testsave.txt', 'r') as sf:
+                modObj = json.loads(sf.read())
+        except IOError:
+            print("The test file is missing or unreadable.")
+        except ValueError:
+            print("The test file is corrupted.")
+        # Populate with test members.
         newMember = actors.Chara()
         newMember.setName("Benjamin")
         newMember.setStr(25)
@@ -74,8 +87,12 @@ class TitleScene: # As the name suggests, the title screen.
         newMember.setEnd(70)
         newMember.setDex(50)
         members.append(newMember)
+        # Replace test members with members from the mod.
+        if modObj != None:
+            for i in range(0,len(objNavigate(modObj,("Characters",)))-1):
+                members[i] = actors.Chara(objNavigate(modObj,("Characters",))[i])
         return members
-        # There is no party yet, so generate a new one. For now, just a dummy one. Later on in development, this will generate an error.
+        # Later on in development, this will generate an error, as the title screen should not generate characters in its finished state.
     
     def getEnemies(self):
         members = []

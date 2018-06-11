@@ -10,6 +10,8 @@ import tkinter as tk
 
 from tkinter import filedialog
 
+from objnav import objNavigate
+
 class Box: # The class for completely non-interactive boxes, superclass for interactive boxes.
     def __init__(self,x,y,w,h,title=None,text=""):
         # Box dimensions.
@@ -184,7 +186,7 @@ class TargetBox(SelectBox): # This box allows selecting between conscious enemie
         return self.members[self.selectedOption] # Return the selected item's ID, not the item itself.
 
 class ModdingBox(Box): # This box allows modifying properties of an object represting the game mod being modified. Or rather, representing the section of the game mod being worked with. More detail on this may be found in devscenes.py
-    def __init__(self,menuObj):
+    def __init__(self,menuObj,baseMenuObj):
         self.optCap = min(len(menuObj[3]),19)
         self.w = 80
         self.h = self.optCap + 5
@@ -202,6 +204,7 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         self.selectedOption = 0 # The number of the currently selected option.
         self.optOffset = 0 # Controls which option should be the top option. This is needed for one to scroll through more options than the box has room for.
         self.menuObj = menuObj[3] # Store the menuObj for later.
+        self.baseMenuObj = baseMenuObj # Store the BASE menu object.
         self.inputMode = "" # The input mode can text or number. Empty means "No, I'm not inputting anything right now."
         self.currentInput = "" # The current input value, if applicable.
         self.cursorPos = 0 # The position of the cursor.
@@ -238,7 +241,7 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         # Draw every option and its current value (or "..." if it leads to a new menu).
         for i,option in enumerate(self.menuObj[self.optOffset:min(self.optOffset+self.optCap,len(self.menuObj))]): # Draw the options.
             if option[0] == None:
-                #print(option[3])
+                print(option)
                 rl.console_print(0, self.x+4, self.y+1+i, option[3][0][3])
             else:
                 rl.console_print(0, self.x+4, self.y+1+i, option[0])
@@ -275,8 +278,27 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
     
     def forward(self): # If enter or the like is pressed and this is the active box.
         if self.subBox != None: # If there is a sub-box, interact with that instead.
-            self.menuObj[self.selectedOption][3] = self.subBox.forward() # Store the selected option.
-            self.subBox = None # Close the sub-box.
+            if self.inputMode == "Delete": # If it's a deletion confirmation box.
+                if self.subBox.forward() == "Yes": # If yes, delete the entry and resize the box.
+                    self.menuObj.pop(self.selectedOption)
+                    # After removing the item, recalculate certain values this may affect.
+                    self.optCap = min(len(self.menuObj),19)
+                    self.h = self.optCap + 5
+                    self.y = 12 - math.ceil(self.h/2)
+                    self.dividerX = 5 # The dividing line between the options and their values.
+                    for option in self.menuObj:
+                        if option[0] == None:
+                            if option[3][0][4] + 5 > self.dividerX:
+                                self.dividerX = option[3][0][4] + 5
+                        else:
+                            if len(option[0]) + 5 > self.dividerX:
+                                self.dividerX = len(option[0]) + 5
+                    if self.selectedOption >= len(self.menuObj): # This should be impossible, but ust in case the cursor ends up out-of-bounds as a result, correct that.
+                        self.selectedOption = len(self.menuObj) - 1
+                self.inputMode = "" # Exit delete mode.
+            else: # If it's a normal multiple-choice selection box.
+                self.menuObj[self.selectedOption][3] = self.subBox.forward() # Store the selected option.
+            self.subBox = None # Close the sub-box either way..
             return
         if self.inputMode != "": # If it's input, confirm and apply said input if it's valid, then exit input mode.
             if self.inputIsValid(self.currentInput,self.menuObj[self.selectedOption][1],self.menuObj[self.selectedOption][4]):
@@ -285,7 +307,7 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
                     self.menuObj[self.selectedOption][3] = int(self.currentInput)
                 else:
                     self.menuObj[self.selectedOption][3] = self.currentInput
-        elif self.menuObj[self.selectedOption][1] == "Menu": # If it's a menu, return said menu.
+        elif self.menuObj[self.selectedOption][1] == "Menu" or self.menuObj[self.selectedOption][1] == "DisposableMenu": # If it's a menu, return said menu.
             return self.menuObj[self.selectedOption]
         elif self.menuObj[self.selectedOption][1] == "Add": # If it's a request to add a submenu, add said submenu and return nothing.
             self.menuObj.insert(self.selectedOption,copy.deepcopy(self.menuObj[self.selectedOption][3]))
@@ -312,16 +334,24 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         elif self.menuObj[self.selectedOption][1] == "Image":
             root = tk.Tk() # Initialize tkinter for this purpose.
             root.withdraw() # Without this, an empty box would be drawn before opening the file selection dialogue. Both annoying and unprofessional.
-            filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Bitmap File","*.bmp"),))
+            filename = filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("Bitmap File","*.bmp"),))
             if filename.endswith(".bmp"):
                 self.menuObj[self.selectedOption][3] = filename # I know this produces an absolute path, which is undesirable. I have plans to make this a relative path in a later update.
             # Sadly, I do not know of any way to return focus to the main window after this process is completed. Annoying, but hey, it's still more convenient then the user having to navigate a file select screen made by libtcod.
         # Open multiple choice selection if needed.
         elif self.menuObj[self.selectedOption][1] == "Select":
             self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0],self.menuObj[self.selectedOption][4],-1)
+        # Handle a LINKED (to another menu's disposable values) multiple choice selection if needed.
+        elif self.menuObj[self.selectedOption][1] == "LinkedSelect":
+            options = ["None"]
+            for entry in objNavigate(self.baseMenuObj,("Characters",)):
+                if entry[1] == "DisposableMenu":
+                    options.append(entry[3][0][3])
+            self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0],options,-1)
         # Otherwise, just set the input mode to the option type, but only if it's a valid type.
         elif self.menuObj[self.selectedOption][1] in ("Text","Number"):
             self.inputMode = self.menuObj[self.selectedOption][1]
+            print(self.inputMode)
             self.currentInput = str(self.menuObj[self.selectedOption][3])
             self.inputOffset = 0
             self.cursorPos = len(self.currentInput)
@@ -331,6 +361,7 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
     def backward(self): # If escape or the like is pressed and this is the active box.
         if self.subBox != None: # If there is a sub-box, interact with that instead.
             self.subBox = None # Close the sub-box.
+            self.inputMode = "" # Revert the input mode.
             return
         if self.inputMode != "":
             self.inputMode = ""
@@ -374,7 +405,10 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         return False
     
     def miscInput(self, key): # Any other keyboard input is handled here.
-        if self.inputMode == "": # Don't do anything if not inputting a value.
+        if self.inputMode == "": # Don't do anything if not inputting a value, UNLESS it's to delete a disposable menu (meaning, a character entry or the like).
+            if key.vk == rl.KEY_DELETE and self.menuObj[self.selectedOption][1] == "DisposableMenu":
+                self.inputMode = "Delete"
+                self.subBox = SelectBox(-1,-1,-1,-1,"Permanently delete this item?",("Yes","No"),-1)
             return
         if key.vk == rl.KEY_BACKSPACE and self.cursorPos > 0: # Handle backspace.
             self.currentInput = self.currentInput[:self.cursorPos-1] + self.currentInput[self.cursorPos:]

@@ -25,22 +25,22 @@ class BattleScene: # As the name suggests, the title screen.
     def addToLog(self,message): # Appends to the log, then clears any lines necessary to make room for the new message.
         if message == None: # If nothing was sent, end the function.
             return
-        self.log.append(message)
-        while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>12:
+        self.log.append(message) # Add the message.
+        while rl.console_get_height_rect(0,0,0,31,24,"\n".join(self.log))>12: # CLear lines as needed.
             self.log.pop(0)
     
-    def checkBattleStatus(self):
-        partyAlive = False
-        for member in self.party:
+    def checkBattleStatus(self): # Check if the battle is won or lost.
+        partyAlive = False # Whether the party has any members conscious.
+        for member in self.party: # Check each party membr in turn.
             if member.getHP() > 0:
                 partyAlive = True
-        if partyAlive == False:
+        if partyAlive == False: # If none are, game over.
             return "GameOverScene"
-        enemiesAlive = False
-        for member in self.enemies:
+        enemiesAlive = False # Whether enemies remain.
+        for member in self.enemies: # CHeck each enemy in turn.
             if member.getHP() > 0:
                 enemiesAlive = True
-        if enemiesAlive == False:
+        if enemiesAlive == False: # If none are, victory!
             return "TitleScene"
     
     def parseTurnResults(self,results=None): # This does various things based on what a given turn action returned.
