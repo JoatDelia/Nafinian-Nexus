@@ -209,6 +209,10 @@ class BattleScene: # As the name suggests, the title screen.
         elif key.vk == rl.KEY_F4 and rl.console_is_key_pressed(rl.KEY_ALT):
             raise SystemExit # Pressing Alt+F4 is against the laws of the game and is punishable with exile.
             return None
+        else: # Let the box handle any other input.
+            if len(self.moveBoxes) == 0 or self.animPhase > 0: # Don't do anything if the menu isn't open or a animation is playing.
+                return None
+            self.moveBoxes[len(self.moveBoxes)-1].miscInput(key)
         return None
     
     def handleCommand(self,command): # Handle pressing Enter in a choice box. I put this in a separate function because there will be many options and I don't want the key handling function to get too large.

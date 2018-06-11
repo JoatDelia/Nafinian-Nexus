@@ -209,7 +209,7 @@ class Actor:
             hitRoll += self.getMod(self.getLuk())
             damageAmt += self.getMod(self.getLuk())
         if dodgeRoll > hitRoll: # Handle misses.
-            message = "{0} misses {1}{2}.".format(self.getColoredName(),target.getColoredName())
+            message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
         if dodgeRoll == hitRoll:
             damageAmt = int(damageAmt / 2 + 0.5)
@@ -248,13 +248,13 @@ class Actor:
             hitRoll += self.getMod(self.getLuk())
             damageAmt += self.getMod(self.getLuk())
         if dodgeRoll > hitRoll: # Handle misses.
-            message = "{0} misses {1}{2}.".format(self.getColoredName(),target.getColoredName())
+            message = "{0} misses {1}.".format(self.getColoredName(),target.getColoredName())
             return {'log': message}
         if dodgeRoll == hitRoll:
             damageAmt = int(damageAmt / 2 + 0.5)
-            message = "{0}'s tooth grazes {1} for {2} damage{3}.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+            message = "{0}'s tooth grazes {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
         else:
-            message = "{0} bites {1} for {2} damage{3}.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+            message = "{0} bites {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
         target.damage(damageAmt) # ...but for now, it just deals 2d6 damage.
         if target.getHP() <= 0:
             message += " Knockout!"

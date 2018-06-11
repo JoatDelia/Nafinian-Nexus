@@ -18,16 +18,16 @@ class DevMenuScene: # As the name suggests, the title screen.
         self.currentBox = self.box
         self.boxes = []
         self.defaultMenuObj = ["Edit", "Menu", "", # The entire modding menu and its current values are stored in this array. Each entry in the menu has at least four items, generally five. The first three being the label, the type, and the help text. The fourth and fifth items are as follows:
-#   Type            4th                 5th
-#   Add             Menu to add         N/A
-#   Boolean         Current value       N/A
-#   DisposableMenu  Submenu object      N/A
-#   File            Current value       N/A
-#   LinkedSelect    Current value       Path to menu (see objnav.py)
-#   Menu            Submenu object      N/A
-#   Number          Current value       Max value (min is 0)
-#   Select          Current value       Possible values
-#   Text            Current value       Character limit
+        #   Type            4th                 5th
+        #   Add             Menu to add         N/A
+        #   Boolean         Current value       N/A
+        #   DisposableMenu  Submenu object      N/A
+        #   File            Current value       N/A
+        #   LinkedSelect    Current value       Path to menu (see objnav.py)
+        #   Menu            Submenu object      N/A
+        #   Number          Current value       Max value (min is 0)
+        #   Select          Current value       Possible values
+        #   Text            Current value       Character limit
             [
                 ["Input Test", "Menu", "Test various types of input. This will obviously be removed in the final game.",
                     [
