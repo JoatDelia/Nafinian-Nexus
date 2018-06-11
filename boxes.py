@@ -152,6 +152,21 @@ class SelectBox(Box): # This box allows selecting from a number of options.
     def backward(self): # If escape or the like is pressed and this is the active box.
         return "CLOSE" # Close the box.
     
+    def miscInput(self, key): # Any other input is handled here.
+        if key.vk == rl.KEY_PAGEUP:
+            self.selectedOption = max(self.selectedOption - self.optCap, 0) # Go up a number of options equal to the number of options that can be shown in the box, capping at the top.
+            self.optOffset = max(self.optOffset - self.optCap, 0) # Do the same to the input offset.
+        elif key.vk == rl.KEY_PAGEDOWN:
+            self.selectedOption = min(self.selectedOption + self.optCap, len(self.options) - 1) # Go down a number of options equal to the number of options that can be shown in the box, capping at the bottom.
+            self.optOffset = min(self.optOffset + self.optCap, len(self.options) - self.optCap) # Do the same to the input offset.
+        elif key.vk == rl.KEY_HOME:
+            self.selectedOption = 0 # Go to the top.
+            self.optOffset = 0 # Do the same to the input offset.
+        elif key.vk == rl.KEY_END:
+            self.selectedOption = len(self.options) - 1 # Go to the bottom.
+            self.optOffset = len(self.options) - self.optCap # Do the same to the input offset.
+        return
+    
     def goUp(self): # If up or the like is pressed.
         self.selectedOption = (self.selectedOption + len(self.options) - 1) % len(self.options) # Go up one option.
         if self.selectedOption < self.optOffset: # If the option selected is above the listed options, fix that.
@@ -409,10 +424,23 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         return False
     
     def miscInput(self, key): # Any other keyboard input is handled here.
-        if self.inputMode == "": # Don't do anything if not inputting a value, UNLESS it's to delete a disposable menu (meaning, a character entry or the like).
+        if self.inputMode == "": # Don't do anything if not inputting a value, UNLESS it's to delete a disposable menu (meaning, a character entry or the like) or to scroll the menu.
             if key.vk == rl.KEY_DELETE and self.menuObj[self.selectedOption][1] == "DisposableMenu":
                 self.inputMode = "Delete"
                 self.subBox = SelectBox(-1,-1,-1,-1,"Permanently delete this item?",("Yes","No"),-1)
+            else: # This code is identical to what is in SelectBox, except replacing a few variable names as needed..
+                if key.vk == rl.KEY_PAGEUP:
+                    self.selectedOption = max(self.selectedOption - self.optCap, 0) # Go up a number of options equal to the number of options that can be shown in the box, capping at the top.
+                    self.optOffset = max(self.optOffset - self.optCap, 0) # Do the same to the input offset.
+                elif key.vk == rl.KEY_PAGEDOWN:
+                    self.selectedOption = min(self.selectedOption + self.optCap, len(self.menuObj) - 1) # Go down a number of options equal to the number of options that can be shown in the box, capping at the bottom.
+                    self.optOffset = min(self.optOffset + self.optCap, len(self.menuObj) - self.optCap) # Do the same to the input offset.
+                elif key.vk == rl.KEY_HOME:
+                    self.selectedOption = 0 # Go to the top.
+                    self.optOffset = 0 # Do the same to the input offset.
+                elif key.vk == rl.KEY_END:
+                    self.selectedOption = len(self.menuObj) - 1 # Go to the bottom.
+                    self.optOffset = len(self.menuObj) - self.optCap # Do the same to the input offset.
             return
         if key.vk == rl.KEY_BACKSPACE and self.cursorPos > 0: # Handle backspace.
             self.currentInput = self.currentInput[:self.cursorPos-1] + self.currentInput[self.cursorPos:]
@@ -423,6 +451,18 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             self.cursorPos -= 1
         elif key.vk == rl.KEY_RIGHT:
             self.cursorPos += 1
+        elif key.vk == rl.KEY_PAGEUP: # Handle PageUp/PageDown/Home/End keys.
+            self.cursorPos -= 76
+            self.inputOffset -= 76
+        elif key.vk == rl.KEY_PAGEDOWN:
+            self.cursorPos += 76
+            self.inputOffset += 76
+        elif key.vk == rl.KEY_HOME:
+            self.cursorPos = 0
+            self.inputOffset = 0
+        elif key.vk == rl.KEY_END:
+            self.cursorPos = len(self.currentInput)
+            self.inputOffset = max(len(self.currentInput) - 75, 0)
         elif key.c >= 32 and key.c <= 126: # Handle typing characters.
             self.currentInput = self.currentInput[:self.cursorPos] + chr(key.c) + self.currentInput[self.cursorPos:]
             self.cursorPos += 1
