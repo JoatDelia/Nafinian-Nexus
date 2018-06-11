@@ -307,6 +307,8 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
                     self.menuObj[self.selectedOption][3] = int(self.currentInput)
                 else:
                     self.menuObj[self.selectedOption][3] = self.currentInput
+                self.inputOffset = 0 # Reset the offset.
+                self.currentInput = "" # Reset the input. These two are to prevent blinking arrows on the description/input section from occurring when they shouldn't.
         elif self.menuObj[self.selectedOption][1] == "Menu" or self.menuObj[self.selectedOption][1] == "DisposableMenu": # If it's a menu, return said menu.
             return self.menuObj[self.selectedOption]
         elif self.menuObj[self.selectedOption][1] == "Add": # If it's a request to add a submenu, add said submenu and return nothing.
@@ -365,6 +367,8 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             return
         if self.inputMode != "":
             self.inputMode = ""
+            self.inputOffset = 0 # Reset the offset.
+            self.currentInput = "" # Reset the input. These two are to prevent blinking arrows on the description/input section from occurring when they shouldn't.
         else:
             return "CLOSE" # Close the box.
     

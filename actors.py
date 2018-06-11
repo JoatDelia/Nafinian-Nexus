@@ -213,9 +213,9 @@ class Actor:
             return {'log': message}
         if dodgeRoll == hitRoll:
             damageAmt = int(damageAmt / 2 + 0.5)
-            message = "{0} grazes {1} for {2} damage{3}.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+            message = "{0} grazes {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
         else:
-            message = "{0} hits {1} for {2} damage{3}.".format(self.getColoredName(),target.getColoredName(),damageAmt)
+            message = "{0} hits {1} for {2} damage.".format(self.getColoredName(),target.getColoredName(),damageAmt)
         target.damage(damageAmt) # Damage the target by the appropriate amount.
         if target.getHP() <= 0: # Show a message for knockout.
             message += " Knockout!"

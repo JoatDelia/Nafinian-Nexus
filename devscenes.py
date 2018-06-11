@@ -31,7 +31,7 @@ class DevMenuScene: # As the name suggests, the title screen.
             [
                 ["Input Test", "Menu", "Test various types of input. This will obviously be removed in the final game.",
                     [
-                        ["Text Test", "Text", "Test text input.", "HPX!", 20],
+                        ["Text Test", "Text", "Test text input.", "HPX!", 100],
                         ["Number Test", "Number", "Test numeric input.", 0, 100],
                         ["Yes/No Test", "Boolean", "Test yes/no input.", "Yes"],
                         ["File Test", "Image", "Test file input (image)", ""],
