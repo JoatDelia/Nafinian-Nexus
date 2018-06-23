@@ -206,8 +206,14 @@ class DevMenuScene: # As the name suggests, the title screen.
                         if len(defaultItem) > 4 and loadedItem[4] != defaultItem[4]: # If the fifth parameter mismatches, simply correct it.
                             loaded[i][4] = copy.deepcopy(defaultItem[4])
                         loadedItem[2] = defaultItem[2] # Change the loaded description to match the default in case it changed.
-                        if defaultItem[1] == "Menu":
+                        if defaultItem[1] == "Menu": # If it's a Menu item, recursively merge within it.
                             self.mergeLoadVals(loadedItem[3],defaultItem[3])
+                        if defaultItem[1] == "Add": # If it's an Add item, override the existing value.
+                            loaded[i][3] = copy.deepcopy(defaultItem[3])
                     itemPresent = True # This item has been found.
+            if defaultItem[1] == "Add": # Special code for handling the description/content updating for DisposableMenus, since unlike other types of entries, its description should be updated to match the Add entry's given description, rather than any corresponding default DisposableMenu description. Theoretically, this breaks down if multiple Add items are in one menu, but that should never happen.
+                for i,loadedItem in enumerate(loaded): # Look through each current item in the loaded (sub-)tree.
+                    if loadedItem[1] == "DisposableMenu":
+                        loaded[i][2] = defaultItem[3][2]
             if not itemPresent: # If the item isn't present, add it.
                 loaded.append(copy.deepcopy(defaultItem))

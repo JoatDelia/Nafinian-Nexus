@@ -10,7 +10,7 @@ import tkinter as tk
 
 from tkinter import filedialog
 
-from objnav import objNavigate
+from objnav import objNavigate, ObjectIndexError
 
 class Box: # The class for completely non-interactive boxes, superclass for interactive boxes.
     def __init__(self,x,y,w,h,title=None,text=""):
@@ -256,7 +256,6 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         # Draw every option and its current value (or "..." if it leads to a new menu).
         for i,option in enumerate(self.menuObj[self.optOffset:min(self.optOffset+self.optCap,len(self.menuObj))]): # Draw the options.
             if option[0] == None:
-                print(option)
                 rl.console_print(0, self.x+4, self.y+1+i, option[3][0][3])
             else:
                 rl.console_print(0, self.x+4, self.y+1+i, option[0])
@@ -293,7 +292,9 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
     
     def forward(self): # If enter or the like is pressed and this is the active box.
         if self.subBox != None: # If there is a sub-box, interact with that instead.
-            if self.inputMode == "Delete": # If it's a deletion confirmation box.
+            if self.inputMode == "Error":
+                self.inputMode = ""
+            elif self.inputMode == "Delete": # If it's a deletion confirmation box.
                 if self.subBox.forward() == "Yes": # If yes, delete the entry and resize the box.
                     self.menuObj.pop(self.selectedOption)
                     # After removing the item, recalculate certain values this may affect.
@@ -361,14 +362,24 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
         # Handle a LINKED (to another menu's disposable values) multiple choice selection if needed.
         elif self.menuObj[self.selectedOption][1] == "LinkedSelect":
             options = ["None"]
-            for entry in objNavigate(self.baseMenuObj,("Characters",)):
-                if entry[1] == "DisposableMenu":
-                    options.append(entry[3][0][3])
-            self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0],options,-1)
+            try:
+                duplicates = False
+                for entry in objNavigate(self.baseMenuObj,("Characters",)):
+                    if entry[1] == "DisposableMenu":
+                        if entry[3][0][3] in options:
+                            duplicates = True
+                        else:
+                            options.append(entry[3][0][3])
+                if duplicates:
+                    self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0]+" (duplicate entries detected)",options,-1)                        
+                else:
+                    self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0],options,-1)
+            except ObjectIndexError:
+                self.inputMode = "Error"
+                self.subBox = Box(-1,-1,22,-1,"Error!","The menu section this is supposed to draw values from does not exist. The file may be corrupted.")
         # Otherwise, just set the input mode to the option type, but only if it's a valid type.
         elif self.menuObj[self.selectedOption][1] in ("Text","Number"):
             self.inputMode = self.menuObj[self.selectedOption][1]
-            print(self.inputMode)
             self.currentInput = str(self.menuObj[self.selectedOption][3])
             self.inputOffset = 0
             self.cursorPos = len(self.currentInput)
@@ -380,7 +391,7 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
             self.subBox = None # Close the sub-box.
             self.inputMode = "" # Revert the input mode.
             return
-        if self.inputMode != "":
+        elif self.inputMode != "":
             self.inputMode = ""
             self.inputOffset = 0 # Reset the offset.
             self.currentInput = "" # Reset the input. These two are to prevent blinking arrows on the description/input section from occurring when they shouldn't.
