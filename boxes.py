@@ -366,12 +366,19 @@ class ModdingBox(Box): # This box allows modifying properties of an object repre
                 duplicates = False
                 for entry in objNavigate(self.baseMenuObj,("Characters",)):
                     if entry[1] == "DisposableMenu":
-                        if entry[3][0][3] in options:
+                        if entry[3][0][3] in options or chr(rl.COLCTRL_FORE_RGB)+chr(255)+chr(255)+chr(1) + entry[3][0][3] + chr(rl.COLCTRL_STOP) in options:
                             duplicates = True
+                            try:
+                                indexOfDup = options.index(entry[3][0][3])
+                            except ValueError:
+                                indexOfDup = options.index(chr(rl.COLCTRL_FORE_RGB)+chr(255)+chr(255)+chr(1) + entry[3][0][3] + chr(rl.COLCTRL_STOP))
+                            if not options[indexOfDup].startswith(chr(rl.COLCTRL_FORE_RGB)):
+                                 options[indexOfDup] = chr(rl.COLCTRL_FORE_RGB)+chr(255)+chr(255)+chr(1) + options[indexOfDup] + chr(rl.COLCTRL_STOP)
+                            options.append(chr(rl.COLCTRL_FORE_RGB)+chr(255)+chr(255)+chr(1) + entry[3][0][3] + chr(rl.COLCTRL_STOP))
                         else:
                             options.append(entry[3][0][3])
                 if duplicates:
-                    self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0]+" (duplicate entries detected)",options,-1)                        
+                    self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0]+" (duplicated entries in yellow)",options,-1)                        
                 else:
                     self.subBox = SelectBox(-1,-1,-1,-1,self.menuObj[self.selectedOption][0],options,-1)
             except ObjectIndexError:
